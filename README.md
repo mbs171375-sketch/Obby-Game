@@ -6,4 +6,4 @@ The course utilizes several custom mechanics to test player skills. Bright red L
 To open and edit this project locally, simply clone or download this repository, launch Roblox Studio, and select File > Open from file... to load the .rbxl file. You can immediately playtest the mechanics or expand the course layouts by pressing F5 to start the simulation. Future updates plan to introduce a global speedrun leaderboard and a custom reward collection system.
 
 Note: This project utilized AI assistance to help structure the code reference layout and document the obstacle mechanics.# Obby-Game
-This is a really impossible game that is not meant for the weak and It is a beginner level game which took lots of time to code. I am a beginner.
+This is a really impossible game that is not meant for the weak and It is a beginner level game which took lots of time to code. I am a beginner. Made using AI
