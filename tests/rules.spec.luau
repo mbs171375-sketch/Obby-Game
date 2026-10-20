@@ -16,6 +16,11 @@ for _,distance in {-1,17.01,math.huge,0/0} do
 end
 
 -- Timer queues in danger and alternates actual offers, with no catch-up spam.
+expect(Rules.intersectsRestoringSurface(0,0,0,7,.8,4.2,3.5),"body intersects a hidden platform")
+expect(Rules.intersectsRestoringSurface(0,3,0,7,.8,4.2,3.5),"legs intersect the restore zone")
+expect(not Rules.intersectsRestoringSurface(0,5,0,7,.8,4.2,3.5),"player safely above the surface")
+expect(not Rules.intersectsRestoringSurface(10,0,0,7,.8,4.2,3.5),"player beside the surface")
+expect(not Rules.intersectsRestoringSurface(0,-4,0,7,.8,4.2,3.5),"player safely below the surface")
 local state=Rules.newPromotion(0)
 expect(Rules.tickPromotion(state,49,true,true,false)==nil,"no early promotion")
 expect(Rules.tickPromotion(state,50,true,false,false)==nil and state.queued,"danger queues offer")

@@ -17,6 +17,11 @@ function Rules.canAdvance(current: number, target: number, distance: number): bo
 		and target <= 101 and Rules.finite(distance) and distance <= 17 and distance >= 0
 end
 
+function Rules.intersectsRestoringSurface(x: number, y: number, z: number, width: number, height: number, depth: number, feet: number): boolean
+	return math.abs(x)<width/2+1.5 and math.abs(z)<depth/2+1.5
+		and y-feet<height/2+.15 and y+2.5>-height/2
+end
+
 function Rules.newPromotion(now: number): PromotionState
 	return { nextAt = now + 50, queued = false, nextKind = "Coil", coil = "Speed" }
 end

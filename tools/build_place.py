@@ -106,6 +106,7 @@ class Place:
         self.parts += 1
         ob=self.item(parent,"Part",name)
         for kind,key,v in [("bool","Anchored",True),("bool","CanCollide",solid),("bool","CanTouch",solid),
+                           ("bool","CanQuery",solid),
                            ("bool","CastShadow",solid),("Vector3","size",size),("CoordinateFrame","CFrame",(pos,yaw)),
                            ("Color3","Color",tuple(v/255 for v in color)),("float","Transparency",alpha),
                            ("token","Material",{"SmoothPlastic":272,"Neon":288,"Grass":1280,"Glass":1568}[material]),
@@ -331,7 +332,7 @@ class Place:
         pad=self.part(model,'SafePad',a,(13,1,10),primary,yaw,material='Neon')
         self.val(pad,'Stage',num);self.val(pad,'Safe',True)
         self.text(pad,f'{num:02d}  /  100\n{name.upper()}',(35,27,62))
-        self.part(model,'Island underside',plus(a,(0,-2.2,0)),(14,3.5,11),secondary,yaw)
+        self.part(model,'Island underside',plus(a,(0,-2.2,0)),(14,3.5,11),secondary,yaw,solid=False)
         # A visible bright side marker makes the direction of travel unmistakable.
         self.part(model,'Direction marker',point(.16,0,.15),(1,.25,2), (255,255,255),yaw,material='Neon',solid=False)
         tiles=[]

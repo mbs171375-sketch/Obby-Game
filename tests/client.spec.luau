@@ -23,7 +23,7 @@ function Methods:IsDescendantOf(parent)
 	while p do if p==parent then return true end;p=p.Parent end
 	return false
 end
-function Methods:GetState() return "Running" end
+function Methods:GetState() return self.State or "Running" end
 local p=ctx.addPlayer(10)
 services.Players.LocalPlayer=p
 local playerGui=new("PlayerGui");playerGui.Name="PlayerGui";playerGui.Parent=p
@@ -70,7 +70,7 @@ local function click(value)
 end
 expect(gui~=nil,"client builds persistent UI")
 local soundtrack=services.SoundService.OrbitMusic:GetChildren()[1]
-expect(soundtrack.SoundId=="rbxassetid://126271266950979","requested Brainrot Rap asset selected")
+expect(soundtrack.SoundId=="rbxassetid://134764779929866","requested Brainrot Rap asset selected")
 expect(findText("STAGE 1 / 100")~=nil,"initial server sync reaches HUD")
 expect(gui.CornerHUD.Size.X.Scale==0 and gui.CornerHUD.Size.X.Offset==216,"desktop stage readout stays in a small corner card")
 expect(gui.CornerHUD.Position.X.Scale==0 and gui.CornerHUD.Position.Y.Scale==0,"stage card never occupies the middle of the screen")
@@ -155,5 +155,39 @@ ctx.workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Fire()
 expect(gui.CornerHUD.Size.X.Offset==180,"phone stage card stays 180 pixels wide")
 expect(findText("STAGE 1 / 100").TextSize==14,"compact stage text layout")
 expect(card.Size.X.Offset==238,"compact promotion width fits portrait screen")
+-- Carry only the current grounded support, preserving walk input and jump freedom.
+local floor
+for _,ob in ctx.world:GetDescendants() do
+	if ob:FindFirstChild("MoveDistance") and not ob:FindFirstChild("Fade") then floor=ob;break end
+end
+local root=p.Character.HumanoidRootPart
+local hum=p.Character.Humanoid
+services.RunService.Heartbeat:Fire()
+floor.CanCollide=true;ctx.setFloor(floor)
+hum.FloorMaterial="Concrete";hum.State="Running"
+root.CFrame=floor.CFrame+r.Vector3.new(0,3,0)
+services.RunService.RenderStepped:Fire()
+local floorBefore=floor.CFrame.Position
+local rootBefore=root.Position
+ctx.step(.1);services.RunService.Heartbeat:Fire();services.RunService.RenderStepped:Fire()
+expect((root.Position-rootBefore-(floor.CFrame.Position-floorBefore)).Magnitude<.001,"owning client adds support translation")
+floorBefore=floor.CFrame.Position
+root.CFrame=root.CFrame+r.Vector3.new(.5,0,0)
+rootBefore=root.Position
+ctx.step(.1);services.RunService.Heartbeat:Fire();services.RunService.RenderStepped:Fire()
+expect((root.Position-rootBefore-(floor.CFrame.Position-floorBefore)).Magnitude<.001,"support does not undo walking input")
+hum.State="Jumping";hum.FloorMaterial=E.Material.Air
+rootBefore=root.Position
+ctx.step(.1);services.RunService.Heartbeat:Fire();services.RunService.RenderStepped:Fire()
+expect((root.Position-rootBefore).Magnitude<.001,"jump releases floor carry immediately")
+hum.State="Running";hum.FloorMaterial="Concrete"
+root.CFrame=floor.CFrame+r.Vector3.new(0,3,0)
+rootBefore=root.Position
+services.RunService.RenderStepped:Fire()
+expect((root.Position-rootBefore).Magnitude<.001,"landing does not apply a stale support offset")
+floor.CanCollide=false
+rootBefore=root.Position
+ctx.step(.1);services.RunService.Heartbeat:Fire();services.RunService.RenderStepped:Fire()
+expect((root.Position-rootBefore).Magnitude<.001,"vanished floor cannot drag the player")
 expect(#ctx.errors==0,table.concat(ctx.errors,"\n"))
 print(string.format("PASS: %d client-wiring assertions with service doubles (not visual/device tests)",checks))

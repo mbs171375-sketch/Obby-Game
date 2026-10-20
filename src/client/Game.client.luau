@@ -287,6 +287,7 @@ local function isSafe()
 	local state=hum:GetState()
 	if state==Enum.HumanoidStateType.Jumping or state==Enum.HumanoidStateType.Freefall then return false end
 	local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={char}
+	params.RespectCanCollide=true
 	local hit=workspace:Raycast(root.Position,Vector3.new(0,-7,0),params)
 	local marker=hit and hit.Instance:FindFirstChild("Safe")
 	return marker~=nil and marker.Value==true
@@ -378,7 +379,38 @@ for _,model in workspace.OrbitWorld:GetDescendants() do
 		table.insert(dancers,{model=model,base=model:GetPivot(),phase=model.Dance.Value,moving=false})
 	end
 end
+-- The player owns their character physics. Apply only the contacted floor's
+-- small translation locally; never drag an airborne player or reuse a stale floor.
+local supportPart,supportFrame,supportCharacter=nil,nil,nil
+local function carryOnSupport()
+	local char=player.Character
+	local root=char and char:FindFirstChild("HumanoidRootPart")
+	local hum=char and char:FindFirstChildOfClass("Humanoid")
+	if not root or not hum or hum.Health<=0 or hum.FloorMaterial==Enum.Material.Air
+		or hum:GetState()==Enum.HumanoidStateType.Jumping or hum:GetState()==Enum.HumanoidStateType.Freefall then
+		supportPart=nil;supportFrame=nil;supportCharacter=nil;return
+	end
+	local feet=math.max(3,hum.HipHeight+root.Size.Y/2)
+	local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances={char};params.RespectCanCollide=true
+	local hit=workspace:Raycast(root.Position,Vector3.new(0,-feet-.8,0),params)
+	local floor=hit and hit.Instance
+	if not floor or not floor.CanCollide or not floor:FindFirstChild("MoveDistance") then
+		supportPart=nil;supportFrame=nil;supportCharacter=nil;return
+	end
+	local localPos=floor.CFrame:PointToObjectSpace(root.Position)
+	if math.abs(localPos.X)>floor.Size.X/2+.3 or math.abs(localPos.Z)>floor.Size.Z/2+.3
+		or math.abs(localPos.Y-floor.Size.Y/2-feet)>.8 then
+		supportPart=nil;supportFrame=nil;supportCharacter=nil;return
+	end
+	if supportPart==floor and supportFrame and supportCharacter==char then
+		local offset=floor.CFrame.Position-supportFrame.Position
+		if offset.Magnitude<=4 then root.CFrame=root.CFrame+offset end
+	end
+	supportPart=floor;supportFrame=floor.CFrame;supportCharacter=char
+end
 RunService.RenderStepped:Connect(function()
+	carryOnSupport()
 	local now=workspace:GetServerTimeNow()
 	for _,dancer in dancers do
 		if settings.ReducedMotion then

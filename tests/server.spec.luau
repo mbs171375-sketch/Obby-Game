@@ -121,7 +121,7 @@ p2.Character.HumanoidRootPart.CFrame=ferry.CFrame+V.new(0,3,0)
 ctx.setFloor(ferry)
 local oldPosition=p2.Character.HumanoidRootPart.Position
 services.RunService.Heartbeat:Fire()
-expect((p2.Character.HumanoidRootPart.Position-oldPosition).Magnitude>.01,"moving cloud carries standing rider")
+expect((p2.Character.HumanoidRootPart.Position-oldPosition).Magnitude<.001,"server never snaps a cloud rider against their controls")
 local spinnerBefore=spinner.CFrame
 step(.5);services.RunService.Heartbeat:Fire()
 expect(spinner.CFrame~=spinnerBefore,"spinner changes orientation")
@@ -136,7 +136,7 @@ local riderBefore=p2.Character.HumanoidRootPart.Position
 step(.45);services.RunService.Heartbeat:Fire()
 expect(math.abs(lift.Position.Y-liftBefore.Y)>.001,"lifts move vertically")
 expect(math.abs(lift.Position.X-liftBefore.X)<.001 and math.abs(lift.Position.Z-liftBefore.Z)<.001,"lift does not drift off its route")
-expect(math.abs((p2.Character.HumanoidRootPart.Position.Y-riderBefore.Y)-(lift.Position.Y-liftBefore.Y))<.001,"lift carries rider by the vertical delta")
+expect((p2.Character.HumanoidRootPart.Position-riderBefore).Magnitude<.001,"server never rewrites a lift rider's character pose")
 stairs.CanCollide=false
 p2.Character.HumanoidRootPart.CFrame=stairs.CFrame+V.new(0,3,0)
 ctx.setFloor(stairs)
@@ -146,7 +146,10 @@ expect((p2.Character.HumanoidRootPart.Position-airPosition).Magnitude<.001,"invi
 crumble.Touched:Fire(p2.Character.HumanoidRootPart)
 expect(crumble.CanCollide,"crumbling step gives a warning before vanishing")
 step(.8);expect(not crumble.CanCollide,"stepped-on crumble platform disappears")
-step(3.6);expect(crumble.CanCollide,"crumble platform restores for other players")
+p2.Character.HumanoidRootPart.CFrame=crumble.CFrame
+step(3.6);expect(not crumble.CanCollide,"platform must not restore inside a character")
+p2.Character.HumanoidRootPart.CFrame=crumble.CFrame+V.new(0,12,0)
+step(.2);expect(crumble.CanCollide,"platform restores after the character clears it")
 local ballBefore=pendulum.CFrame
 step(.4);services.RunService.Heartbeat:Fire()
 expect(pendulum.CFrame~=ballBefore,"dodge ball swings in a pendulum arc")

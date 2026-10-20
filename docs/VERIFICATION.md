@@ -10,12 +10,12 @@ Run `python3 tools/verify.py --tools /workspace/obby-tools` in this cloud enviro
 
 | Check | Result | Evidence and scope |
 |---|---|---|
-| Map topology and generation | PASS | 10 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
+| Map topology and generation | PASS | 11 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
 | Luau compilation | PASS | All four production source files compiled using Luau 0.743 |
 | Shared-module strict type checks | PASS | `luau-analyze` passes Rules and Config; engine scripts were compiled/simulated, not type-checked against Studio's engine definitions |
-| Pure progression, promotion and transaction rules | PASS | 53 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
-| Production server event wiring | PASS | 64 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
-| Production client event wiring | PASS | 32 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
+| Pure progression, promotion and transaction rules | PASS | 58 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
+| Production server event wiring | PASS | 65 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
+| Production client event wiring | PASS | 37 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
 | Shipped defaults and unpublished-place mode | PASS | 16 assertions with all product IDs zero and GetDataStore unavailable; full free run, earned cosmetics, restart and disabled checkout |
 | Roblox XML and binary serialization | PASS | 6,708 assertions using Lune 0.11.0/rbx-dom; 6,292 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
 | Tool installation repeatability | PASS | Pinned upstream Luau/Lune release archives downloaded with TLS and verified against fixed SHA-256 checksums before extraction |
@@ -49,7 +49,7 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 | Lava hazards | UNVERIFIED | Touch simulation reduces health to zero; actual contact requires engine observation |
 | Rotating hazards | UNVERIFIED | Simulated rotation changes; moving-hazard overlap scan is implemented; real contact and jump timing unverified |
 | Character skins | UNVERIFIED | Coin purchase, original palette restoration, companion creation and free re-equip pass server simulation; rendered avatar appearance unverified |
-| Requested Brainrot Rap recording | UNVERIFIED | User supplied audio ID 126271266950979, configured and SoundId verified in client simulation; actual Roblox playback/permissions unverified |
+| Requested Brainrot Rap recording | UNVERIFIED | User supplied audio ID 134764779929866, configured and SoundId verified in client simulation; actual Roblox playback/permissions unverified |
 | Fictional speed leaderboard | PASS | Lobby NPC rivals board has fast invented times explicitly labelled FICTIONAL TIMES / NOT PLAYER RECORDS; not mixed with actual player stats |
 | Music | UNVERIFIED | Original percussion sequencer and optional owned-track playlist implemented; simulated OFF stops notes; actual bundled sound playback unverified |
 | Sound-effect controls | PASS | Simulated muted notifications do not call Sound.Play; actual sound output unverified |

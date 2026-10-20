@@ -5,6 +5,7 @@ Built /workspace/Obby-Game/dist/BrainrotOrbit.rbxlx: 100 stages, 6291 parts, 847
 test_all_100_stages_and_ten_worlds (test_map.MapTests.test_all_100_stages_and_ten_worlds) ... ok
 test_brainrot_characters_and_mouth_finish (test_map.MapTests.test_brainrot_characters_and_mouth_finish) ... ok
 test_course_climbs_drops_and_curves (test_map.MapTests.test_course_climbs_drops_and_curves) ... ok
+test_decorative_edges_cannot_snag_or_intercept_ground_checks (test_map.MapTests.test_decorative_edges_cannot_snag_or_intercept_ground_checks) ... ok
 test_deterministic_rebuild (test_map.MapTests.test_deterministic_rebuild) ... ok
 test_each_stage_has_free_default_jump_route (test_map.MapTests.test_each_stage_has_free_default_jump_route) ... ok
 test_hazards_visible_and_side_routes_solid (test_map.MapTests.test_hazards_visible_and_side_routes_solid) ... ok
@@ -14,21 +15,21 @@ test_original_place_preserved (test_map.MapTests.test_original_place_preserved) 
 test_unique_referents_and_valid_instance_parents (test_map.MapTests.test_unique_referents_and_valid_instance_parents) ... ok
 
 ----------------------------------------------------------------------
-Ran 10 tests in 1.543s
+Ran 11 tests in 1.600s
 
 OK
 
 + /workspace/obby-tools/luau-compile src/client/Game.client.luau src/server/Game.server.luau src/shared/Config.luau src/shared/Rules.luau --null
-Compiled 1 KLOC into 61 KB bytecode (read 0.00s, parse 0.00s, compile 0.00s)
+Compiled 1 KLOC into 62 KB bytecode (read 0.00s, parse 0.00s, compile 0.00s)
 
 + /workspace/obby-tools/luau-analyze src/shared/Rules.luau src/shared/Config.luau
 
 + /workspace/obby-tools/luau tests/rules.spec.luau
-PASS: 53 game-rule assertions
+PASS: 58 game-rule assertions
 
 + /workspace/obby-tools/lune run tests/client.spec.luau
-PASS: 64 production-server assertions with service doubles (not engine playtests)
-PASS: 32 client-wiring assertions with service doubles (not visual/device tests)
+PASS: 65 production-server assertions with service doubles (not engine playtests)
+PASS: 37 client-wiring assertions with service doubles (not visual/device tests)
 
 + /workspace/obby-tools/lune run tests/offline.spec.luau
 PASS: 16 shipped-default/unpublished-place assertions with service doubles

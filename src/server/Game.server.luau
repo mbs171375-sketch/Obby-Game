@@ -70,10 +70,30 @@ local function safeFloor(player)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character }
+	params.RespectCanCollide = true
 	local hit = workspace:Raycast(root.Position, Vector3.new(0, -7, 0), params)
 	if not hit then return false end
 	local safe = hit.Instance:FindFirstChild("Safe")
 	return safe ~= nil and safe.Value == true
+end
+
+local function restoreSurface(ob)
+	while ob.Parent do
+		local occupied=false
+		for player in sessions do
+			local char=player.Character
+			local root=char and char:FindFirstChild("HumanoidRootPart")
+			local hum=char and char:FindFirstChildOfClass("Humanoid")
+			if root and hum and hum.Health>0 then
+				local p=ob.CFrame:PointToObjectSpace(root.Position)
+				local feet=math.max(3.5,hum.HipHeight+root.Size.Y/2)
+				if Rules.intersectsRestoringSurface(p.X,p.Y,p.Z,ob.Size.X,ob.Size.Y,ob.Size.Z,feet) then occupied=true;break end
+			end
+		end
+		if not occupied then ob.CanCollide=true;return true end
+		task.wait(.1)
+	end
+	return false
 end
 
 local function update(player, transform)
@@ -309,7 +329,8 @@ for _, ob in World:GetDescendants() do
 			task.spawn(function()
 				task.wait(ob.Fade.Value)
 				while ob.Parent do
-					ob.CanCollide = true; ob.Transparency = 0; ob.Color = Color3.fromRGB(115,255,199)
+					if not ob.CanCollide and not restoreSurface(ob) then return end
+					ob.Transparency = 0; ob.Color = Color3.fromRGB(115,255,199)
 					task.wait(3.5)
 					ob.Color = Color3.fromRGB(255,199,82)
 					task.wait(1.3)
@@ -327,16 +348,15 @@ for _, ob in World:GetDescendants() do
 				task.wait(.75)
 				ob.CanCollide=false;ob.Transparency=.9
 				task.wait(3.5)
-				ob.CanCollide=true;ob.Transparency=0;ob.Color=baseColor;crumbling=false
+				if restoreSurface(ob) then ob.Transparency=0;ob.Color=baseColor;crumbling=false end
 			end)
 		end
 	end
 end
 assert(#pads == 101, "Orbit requires all 100 stage starts and the finish pad")
 
--- One heartbeat handles all moving objects; ferry delta carries standing riders.
+-- Server animates obstacles; the owning client handles grounded platform carry.
 local movers = {}
-local movingFloors = {}
 local nextHazardScan = 0
 for _, ob in World:GetDescendants() do
 	if ob:IsA("BasePart") and (ob:FindFirstChild("Spinner") or ob:FindFirstChild("MoveDistance") or ob:FindFirstChild("Pendulum")) then
@@ -346,29 +366,13 @@ for _, ob in World:GetDescendants() do
 				if child:FindFirstChild("PendulumCable") and child.PendulumIndex.Value==ob.PendulumIndex.Value then cable=child end
 			end
 		end
-		table.insert(movers, { part = ob, base = ob.CFrame, previous = ob.CFrame, cable=cable })
-		if ob:FindFirstChild("MoveDistance") then movingFloors[ob]=true end
+		table.insert(movers, { part = ob, base = ob.CFrame, cable=cable })
 	end
 end
 RunService.Heartbeat:Connect(function()
 	local now = workspace:GetServerTimeNow()
 	local scanHazards = now >= nextHazardScan
 	if scanHazards then nextHazardScan = now + .08 end
-	-- One ground query per player avoids checking every rider against hundreds of stairs.
-	local riders={}
-	for player in sessions do
-		local char=player.Character
-		local root=char and char:FindFirstChild("HumanoidRootPart")
-		if root and root.AssemblyLinearVelocity.Y<8 then
-			local params=RaycastParams.new()
-			params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={char}
-			local hit=workspace:Raycast(root.Position,Vector3.new(0,-6,0),params)
-			if hit and movingFloors[hit.Instance] and hit.Instance.CanCollide then
-				riders[hit.Instance]=riders[hit.Instance] or {}
-				table.insert(riders[hit.Instance],{char=char,root=root})
-			end
-		end
-	end
 	for _, mover in movers do
 		local ob = mover.part
 		if ob:FindFirstChild("Spinner") then
@@ -403,18 +407,9 @@ RunService.Heartbeat:Connect(function()
 			local offset=math.sin(now*math.pi*2/ob.MovePeriod.Value)*ob.MoveDistance.Value
 			local axis=ob:FindFirstChild("MoveAxis")
 			local cf = mover.base * (if axis and axis.Value=="Y" then CFrame.new(0,offset,0) else CFrame.new(0,0,offset))
-			local delta = cf * mover.previous:Inverse()
-			for _,rider in riders[ob] or {} do
-				local char,root=rider.char,rider.root
-				if char.Parent then
-					local localPos = mover.previous:PointToObjectSpace(root.Position)
-					if ob.CanCollide and math.abs(localPos.X) < ob.Size.X/2 + .5 and math.abs(localPos.Z) < ob.Size.Z/2 + .5
-						and localPos.Y > .5 and localPos.Y < 5 and root.AssemblyLinearVelocity.Y < 8 then
-						char:PivotTo(delta * char:GetPivot())
-					end
-				end
-			end
-			ob.CFrame = cf; mover.previous = cf
+			-- The owning client applies only its support's translation. Server PivotTo
+			-- every Heartbeat fought the player's walking/jumping over the network.
+			ob.CFrame = cf
 		end
 	end
 end)

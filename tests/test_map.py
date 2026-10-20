@@ -114,6 +114,18 @@ class MapTests(unittest.TestCase):
         self.assertEqual(len(original),90653)
         self.assertTrue(original.startswith(b'<roblox!'))
 
+    def test_decorative_edges_cannot_snag_or_intercept_ground_checks(self):
+        undersides=0
+        for item in self.root.iter('Item'):
+            props=item.find('Properties')
+            if item.attrib['class']!='Part':continue
+            name=props.find('string[@name="Name"]').text
+            collide=props.find('bool[@name="CanCollide"]').text=='true'
+            if not collide:self.assertEqual(props.find('bool[@name="CanQuery"]').text,'false')
+            if name=='Island underside':
+                undersides+=1;self.assertFalse(collide,'island collar must not trap feet at the edge')
+        self.assertEqual(undersides,100)
+
     def test_brainrot_characters_and_mouth_finish(self):
         items=list(self.root.iter('Item'))
         names=[i.find('Properties/string[@name="Name"]').text for i in items]
