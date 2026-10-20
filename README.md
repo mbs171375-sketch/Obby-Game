@@ -6,7 +6,7 @@ A colourful, standalone Roblox obby: **100 stages, 10 original meme worlds, one 
 
 ![Offline geometry preview, not a Roblox screenshot](docs/course-preview.png)
 
-**Update 3:** [Switchback chaos](docs/UPDATE_3.md): 6,889-stud route, shuffled obstacles, disappearing moving stairs, lifts, crumbling steps, swinging balls, and a labelled NPC rivals board. Brainrot Rap is configured with the supplied audio asset `127002536892791`; actual playback and experience permissions remain unverified.
+**Update 3:** [Switchback chaos](docs/UPDATE_3.md): 6,889-stud route, shuffled obstacles, disappearing moving stairs, lifts, crumbling steps, swinging balls, and a labelled NPC rivals board. Brainrot Rap is configured with the supplied audio asset `126271266950979`; actual playback and experience permissions remain unverified.
 
 **Update 2:** [Tung’s Mouth update notes](docs/UPDATE_2.md): smaller corner HUD, dancing brainrot figures, rotating bats, original percussion, and a giant mouth finish.
 
