@@ -1,0 +1,37 @@
++ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 tools/build_place.py
+Built /workspace/Obby-Game/dist/BrainrotOrbit.rbxlx: 100 stages, 3457 parts, 4691 objects
+
++ /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m unittest discover -s tests -p test_*.py -v
+test_all_100_stages_and_ten_worlds (test_map.MapTests.test_all_100_stages_and_ten_worlds) ... ok
+test_course_climbs_drops_and_curves (test_map.MapTests.test_course_climbs_drops_and_curves) ... ok
+test_deterministic_rebuild (test_map.MapTests.test_deterministic_rebuild) ... ok
+test_each_stage_has_free_default_jump_route (test_map.MapTests.test_each_stage_has_free_default_jump_route) ... ok
+test_hazards_visible_and_side_routes_solid (test_map.MapTests.test_hazards_visible_and_side_routes_solid) ... ok
+test_no_paid_gates_or_checkpoints (test_map.MapTests.test_no_paid_gates_or_checkpoints) ... ok
+test_original_place_preserved (test_map.MapTests.test_original_place_preserved) ... ok
+test_unique_referents_and_valid_instance_parents (test_map.MapTests.test_unique_referents_and_valid_instance_parents) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.690s
+
+OK
+
++ /workspace/obby-tools/luau-compile src/client/Game.client.luau src/server/Game.server.luau src/shared/Config.luau src/shared/Rules.luau --null
+Compiled 1 KLOC into 58 KB bytecode (read 0.00s, parse 0.00s, compile 0.00s)
+
++ /workspace/obby-tools/luau-analyze src/shared/Rules.luau src/shared/Config.luau
+
++ /workspace/obby-tools/luau tests/rules.spec.luau
+PASS: 53 game-rule assertions
+
++ /workspace/obby-tools/lune run tests/client.spec.luau
+PASS: 53 production-server assertions with service doubles (not engine playtests)
+PASS: 28 client-wiring assertions with service doubles (not visual/device tests)
+
++ /workspace/obby-tools/lune run tests/offline.spec.luau
+PASS: 16 shipped-default/unpublished-place assertions with service doubles
+
++ /workspace/obby-tools/lune run tests/place.spec.luau
+PASS: 3872 Roblox serialization assertions; 3458 parts; XML and binary places written
+
+Offline checks passed. Roblox gameplay, real purchases, audio playback and physical device rendering remain unverified.

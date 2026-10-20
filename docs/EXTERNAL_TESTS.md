@@ -1,0 +1,18 @@
+# Optional external playtesting and required purchase configuration
+
+Claude review and Roblox Studio playtesting were waived by the requester. These instructions are provided for whoever later verifies the live engine; none of the steps below are claimed to have happened here.
+
+1. Open `dist/BrainrotOrbit.rbxl` in Studio and press F5. Confirm that the lobby and mascot scenery load and the Output window has no script errors.
+2. Walk towards stage 1, verify the camera faces the course, and complete the first ten obstacles. Check lava, lasers, warning colours, spring motion, the gold ZOOM pad, conveyor drift, the moving cloud and both free side paths.
+3. Traverse all 100 stages, including the highest/lowest sections and curved approaches. Confirm each numbered island advances once, the finish grants exactly one win and 100 bonus coins, and the timer stops. Note any jump that feels unfair, blind or unreliable.
+4. Die after several stages and after a purchased skip. Confirm the next character appears at the original lobby with stage 1, while free coins, cosmetics and unused credits remain. Repeat with RESTART and RUN AGAIN.
+5. Open SHOP via HUD and both lobby kiosks. Earn coins, select each character cosmetic, and reselect owned cosmetics without another charge. Revert to Classic and confirm original colours are restored. Test a fresh avatar after appearance loading.
+6. Open Settings. Toggle music, effects, reminder cards and reduced motion; rejoin the published test experience to check persistence. Test DataStore unavailable mode in an unpublished file separately.
+7. In a creator-owned test experience, configure the two Game Pass IDs and the Skip Developer Product ID. Product IDs are numbers, not secrets. Verify the regional price displayed in the shop matches Roblox checkout. Zero/invalid/off-sale IDs must never produce a misleading offer.
+8. Follow Roblox's currently supported purchase testing procedures for those products; do not spend real money simply to test. Close/cancel prompts and verify no grant. For a supported successful test, confirm Game Pass ownership before coils equip and confirm a Developer Product creates one saved credit. Replayed receipts must not grant twice. Use the credit only after standing still on a numbered island. Rejoin with unused credits.
+9. With configured available products, wait at least 50 seconds while jumping: no card should appear. Stand still on a safe pad for two seconds: the queued offer may appear. Move: it must hide immediately. Confirm X works, menus remain accessible, later offers alternate, and no checkout opens without Buy. Disable reminders and confirm they stay off after rejoining.
+10. Use Studio's multi-client mode with at least two players. Verify independent stages, coins, skins, boosts, finish rewards and player-list leaderstats. Check cloud riders and disappearing tiles under simulated latency. Attempt malformed and rapid remote actions in a controlled test without granting inventory.
+11. Use device emulation for small portrait phones and landscape phones, then real devices if available. Check HUD clipping, buttons, scrolling, X dismissal, jump/joystick clearance, camera visibility and performance. Check controller selection and menu closure.
+12. Record device/build, test steps, exact Output errors and pass/fail results. Fix failures and rerun affected tests. Rebuild only after preserving Studio edits. Do not describe physical devices, payments or engine gameplay as verified based on the offline suite.
+
+If an independent code review is wanted later, provide all four production Luau files, the builder, map manifest, place file, these architecture notes and test results. No Claude review has been performed.
