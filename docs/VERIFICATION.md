@@ -49,7 +49,7 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 | Lava hazards | UNVERIFIED | Touch simulation reduces health to zero; actual contact requires engine observation |
 | Rotating hazards | UNVERIFIED | Simulated rotation changes; moving-hazard overlap scan is implemented; real contact and jump timing unverified |
 | Character skins | UNVERIFIED | Coin purchase, original palette restoration, companion creation and free re-equip pass server simulation; rendered avatar appearance unverified |
-| Requested Brainrot Rap recording | UNVERIFIED | User supplied audio ID 85039047299073, configured and SoundId verified in client simulation; actual Roblox playback/permissions unverified |
+| Requested Brainrot Rap recording | UNVERIFIED | User supplied audio ID 127002536892791, configured and SoundId verified in client simulation; actual Roblox playback/permissions unverified |
 | Fictional speed leaderboard | PASS | Lobby NPC rivals board has fast invented times explicitly labelled FICTIONAL TIMES / NOT PLAYER RECORDS; not mixed with actual player stats |
 | Music | UNVERIFIED | Original percussion sequencer and optional owned-track playlist implemented; simulated OFF stops notes; actual bundled sound playback unverified |
 | Sound-effect controls | PASS | Simulated muted notifications do not call Sound.Play; actual sound output unverified |

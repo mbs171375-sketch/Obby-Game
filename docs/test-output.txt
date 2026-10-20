@@ -14,7 +14,7 @@ test_original_place_preserved (test_map.MapTests.test_original_place_preserved) 
 test_unique_referents_and_valid_instance_parents (test_map.MapTests.test_unique_referents_and_valid_instance_parents) ... ok
 
 ----------------------------------------------------------------------
-Ran 10 tests in 1.408s
+Ran 10 tests in 1.499s
 
 OK
 
