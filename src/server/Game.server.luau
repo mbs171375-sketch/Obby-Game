@@ -48,11 +48,10 @@ local function view(player)
 	if stats then
 		stats.Stage.Value = completed
 		stats.Wins.Value = s.data.Wins + s.pending.Wins
-		stats.Coins.Value = s.data.Coins + s.pending.Coins
 	end
 	State:FireClient(player, {
 		Stage = s.run.stage, Completed = completed, Finished = s.run.finished,
-		Coins = s.data.Coins + s.pending.Coins, Wins = s.data.Wins + s.pending.Wins,
+		Wins = s.data.Wins + s.pending.Wins,
 		Best = math.max(s.data.Best, s.pending.Best), SkipCredits = s.data.SkipCredits,
 		Skin = s.data.Skin, Skins = s.data.Skins, Equipped = s.equipped,
 		Owned = s.owned, Catalogue = catalogue, Saving = s.persistent and s.saveHealthy,
@@ -223,15 +222,15 @@ local function applyCoil(player)
 	local root = char and char:FindFirstChild("HumanoidRootPart")
 	if not s or not hum or not root then return end
 	hum.UseJumpPower = true
-	local speed = if s.equipped == "Speed" then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
+	local speed = if s.equipped.Speed then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
 	hum.WalkSpeed = if (s.boostUntil or 0) > os.clock() then math.max(speed,22) else speed
-	hum.JumpPower = if s.equipped == "Gravity" then Config.GravityCoilJump else Config.BaseJumpPower
+	hum.JumpPower = if s.equipped.Gravity then Config.GravityCoilJump else Config.BaseJumpPower
 	local previous = char:FindFirstChild("EquippedCoil")
 	if previous then previous:Destroy() end
-	if s.equipped == "None" then return end
+	if not s.equipped.Speed and not s.equipped.Gravity then return end
 	local coil = Instance.new("Model")
 	coil.Name = "EquippedCoil"; coil.Parent = char
-	local color = Color3.fromRGB(table.unpack(Config.Products[s.equipped].Color))
+	local color = Color3.fromRGB(table.unpack(Config.Products[if s.equipped.Speed then "Speed" else "Gravity"].Color))
 	for i = 1, 6 do
 		local ring = Instance.new("Part")
 		ring.Name = "CoilRing"; ring.Shape = Enum.PartType.Cylinder
@@ -249,8 +248,8 @@ local function complete(player)
 	if not s or s.run.finished then return end
 	s.run.stage = 101; s.run.finished = true
 	s.run.duration = if s.run.started then workspace:GetServerTimeNow() - s.run.started else 0
-	s.pending.Coins += Config.WinCoins; s.pending.Wins += 1; s.pending.Best = 100
-	notice(player, "100 STAGES! +100 coins. Your last brain cell is legendary.", "Win")
+	s.pending.Wins += 1; s.pending.Best = 100
+	notice(player, "100 STAGES! Your last brain cell is legendary.", "Win")
 	view(player)
 	task.spawn(function() flush(player); view(player) end)
 end
@@ -260,7 +259,6 @@ local function advance(player, target)
 	if not s or s.run.finished then return end
 	if target == 101 then complete(player); return end
 	s.run.stage = target
-	s.pending.Coins += Config.StageCoins
 	s.pending.Best = math.max(s.pending.Best, target - 1)
 	view(player)
 	if (target - 1) % 10 == 0 then notice(player, "NEW WORLD! " .. pads[target].Parent.Theme.Value, "World") end
@@ -420,9 +418,15 @@ local function loadOwnership(player)
 	for name, product in Config.Products do
 		if product.Kind == "Pass" and product.Id > 0 then
 			local ok, owns = pcall(MarketplaceService.UserOwnsGamePassAsync, MarketplaceService, player.UserId, product.Id)
-			if ok and sessions[player] == s then s.owned[name] = owns end
+			if ok and sessions[player] == s then
+				local firstOwned = owns and not s.owned[name]
+				s.owned[name] = owns
+				if firstOwned then s.equipped[name] = true end
+				if not owns then s.equipped[name] = false end
+			end
 		end
 	end
+	applyCoil(player)
 	view(player)
 end
 
@@ -437,7 +441,7 @@ local function setupPlayer(player)
 	if not player.Parent then loading[player] = nil; return end
 	local data = Rules.normalize(if ok then raw else nil)
 	sessions[player] = { data = data, pending = { Coins = 0, Wins = 0, Best = 0 },
-		persistent = ok, saveHealthy = ok, flushing = false, busy = false, equipped = "None", owned = {},
+		persistent = ok, saveHealthy = ok, flushing = false, busy = false, equipped = {}, owned = {},
 		run = { stage = 1, started = nil, finished = false, lastAdvance = 0 }, tokens = 10, tokenAt = os.clock() }
 	loading[player] = nil
 	-- Recover a reservation interrupted by a crash/death; no purchase can silently disappear.
@@ -448,7 +452,7 @@ local function setupPlayer(player)
 	end
 	if not player.Parent or not sessions[player] then return end
 	local stats = Instance.new("Folder"); stats.Name = "leaderstats"; stats.Parent = player
-	for _, name in { "Stage", "Wins", "Coins" } do
+	for _, name in { "Stage", "Wins" } do
 		local value = Instance.new("IntValue"); value.Name = name; value.Parent = stats
 	end
 	local function characterAdded(char)
@@ -467,7 +471,7 @@ local function setupPlayer(player)
 	end
 	player.CharacterAdded:Connect(characterAdded)
 	player.CharacterAppearanceLoaded:Connect(function(char)
-		if player.Character == char then applyLook(player) end
+		if player.Character == char then applyLook(player); applyCoil(player) end
 	end)
 	if player.Character then task.spawn(characterAdded, player.Character) end
 	if not ok then
@@ -486,25 +490,27 @@ local function useSkip(player)
 	local originalRun = s.run
 	local originalStage = originalRun.stage
 	if s.data.SkipCredits <= 0 then notice(player,"No skip credits available."); return end
+	local amount = math.min(10,s.data.SkipCredits,101-originalStage)
+	local target = originalStage + amount
 	local spent = false
 	local token = HttpService:GenerateGUID(false)
 	local result = update(player, function(data)
-		local updated, didSpend = Rules.reserveSkip(data,token)
+		local updated, didSpend = Rules.reserveSkip(data,token,amount)
 		spent = didSpend
 		return updated
 	end)
 	if not result or not spent then notice(player,"Credit could not be used. Try again later.","Warning"); return end
 	s.data = result
-	if s.run ~= originalRun or s.run.stage ~= originalStage or not moveTo(player,pads[originalStage+1]) then
+	if s.run ~= originalRun or s.run.stage ~= originalStage or not moveTo(player,pads[target]) then
 		-- A death or disconnect during storage must not destroy the unused purchase.
 		local refunded = update(player,function(data) return Rules.resolveSkip(data,token,false) end)
 		if refunded then s.data = refunded end
 		notice(player,if refunded then "Run changed. Your credit was returned." else "Credit recovery queued. Rejoin when saves are available.","Warning"); view(player); return
 	end
-	advance(player, originalStage+1)
+	advance(player, target)
 	local settled = update(player,function(data) return Rules.resolveSkip(data,token,true) end)
 	if settled then s.data = settled end
-	notice(player,"Stage skipped. Death still resets the entire run.")
+	notice(player,string.format("Skipped %d stages! Death still resets the entire run.",amount))
 	view(player)
 end
 
@@ -523,30 +529,13 @@ Action.OnServerEvent:Connect(function(player, action, argument)
 		if action == "Restart" then
 			resetRun(player); moveTo(player, World.Lobby.OriginalStart)
 		elseif action == "EquipCoil" then
-			if argument == "None" or ((argument == "Speed" or argument == "Gravity") and s.owned[argument]) then
-				s.equipped = argument; applyCoil(player); view(player)
+			if argument == "None" then
+				s.equipped = {}; applyCoil(player); view(player)
+			elseif (argument == "Speed" or argument == "Gravity") and s.owned[argument] then
+				s.equipped[argument] = not s.equipped[argument]; applyCoil(player); view(player)
 			end
 		elseif action == "UseSkip" then
 			useSkip(player)
-		elseif action == "Skin" then
-			local skin
-			for _, item in Config.Skins do if item.Id == argument then skin = item end end
-			if not skin then return end
-			if s.persistent then
-				if not flush(player) then notice(player,"Save unavailable. Try again later.","Warning"); return end
-				local bought = false
-				local result = update(player, function(data)
-					local updated, success = Rules.buySkin(data,skin.Id,skin.Cost); bought = success; return updated
-				end)
-				if not result or not bought then notice(player,"Not enough coins or save unavailable."); return end
-				s.data = result
-			else
-				local available = table.clone(s.data); available.Coins += s.pending.Coins
-				local result, bought = Rules.buySkin(available,skin.Id,skin.Cost)
-				if not bought then notice(player,"Earn more coins by completing stages."); return end
-				s.pending.Coins = 0; s.data = result
-			end
-			applyLook(player); view(player)
 		elseif action == "Settings" then
 			if not argument then return end
 			local name, value = argument:match("^(%a+):(%a+)$")
@@ -580,7 +569,7 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player,id,pur
 			task.spawn(function()
 				loadOwnership(player)
 				local s = sessions[player]
-				if s and s.owned[name] then s.equipped = name; applyCoil(player); view(player) end
+				if s and s.owned[name] then s.equipped[name] = true; applyCoil(player); view(player) end
 			end)
 		end
 	end
@@ -591,14 +580,23 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	local s = player and sessions[player]
 	if not s or not s.persistent then return IN_FLIGHT end
+	local newlyGranted = false
 	local result = update(player,function(data)
-		local updated = Rules.grantReceipt(data,tostring(receipt.PurchaseId),Config.Products.Skip.Credits)
+		local updated, granted = Rules.grantReceipt(data,tostring(receipt.PurchaseId),Config.Products.Skip.Credits)
+		newlyGranted = granted
 		return updated
 	end)
 	if not result or not result.Receipts[tostring(receipt.PurchaseId)] then return IN_FLIGHT end
 	s.data = result
 	view(player)
-	notice(player,string.format("%d skip credits saved. Use one from a safe island when you choose.",result.SkipCredits))
+	if newlyGranted and not s.busy and s.run.started and not s.run.finished and safeFloor(player) then
+		s.busy = true
+		local ok, err = pcall(useSkip,player)
+		s.busy = false
+		if not ok then warn("[Orbit] Saved skip awaits manual use",err) end
+	elseif newlyGranted then
+		notice(player,"10 stage skips saved! Stand on a safe island and press SKIP +10 in the shop.")
+	end
 	return GRANTED
 end
 

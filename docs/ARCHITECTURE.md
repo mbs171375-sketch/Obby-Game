@@ -34,7 +34,7 @@ The fading route warns in amber before disappearing. Its side stones stay solid.
 
 Clients send only bounded action names and item identifiers. They cannot submit prices, balances, rewards, target stages or an ownership flag. The server validates stage order and proximity, rate-limits actions, and validates products against the configured catalogue. This is not a comprehensive movement anti-cheat: a determined client-side teleport exploit needs additional production movement validation.
 
-Profiles use one DataStore key per player. Coins/wins save as deltas and best progress merges monotonically, preserving newer receipt updates. Local storage operations are serialized. Save outages keep unsaved deltas for retry; unpublished/initially unavailable storage uses an explicitly labelled session-only mode and disables purchases. A server crash before autosave can lose unflushed free rewards. There is no claim of cross-region transaction availability during an outage.
+Profiles use one DataStore key per player. Wins save as deltas and best progress merges monotonically, preserving newer receipt updates. Local storage operations are serialized. Save outages keep unsaved deltas for retry; unpublished/initially unavailable storage uses an explicitly labelled session-only mode and disables purchases. A server crash before autosave can lose unflushed free rewards. There is no claim of cross-region transaction availability during an outage.
 
 Developer Product receipts add the configured ten durable skip credits and store the purchase ID in the same atomic `UpdateAsync`. Duplicate IDs never add another credit. Unknown products and failed storage operations return `NotProcessedYet`. Purchase completion signals alone never grant Developer Products. Game Pass completion re-queries server-side ownership before granting benefits.
 
@@ -49,3 +49,9 @@ The state machine checks a 50-second cadence and queues at most one offer. A car
 The selected soundtrack is user-supplied Roblox audio asset 134764779929866 (Brainrot Rap). Its exact SoundId and mute handling pass simulation, but live playback and experience permissions are unverified. A public metadata request was blocked by this cloud network with HTTP 403; this does not establish an invalid asset. Clearing MusicTracks selects an original 132 BPM percussion sequence using bundled samples. Cosmetics provide body colour accents, a companion and trail; they do not replace the player's avatar body or clothing. Reduced motion removes UI tweening and confetti and restores the 27 dancing brainrot models to their static poses; moving gameplay obstacles remain active.
 
 The scene contains 6,292 BaseParts, including the spawn. Decorative objects do not cast shadows. Streaming is disabled for predictable first-launch behaviour. Low-end mobile FPS, camera comfort and touch ergonomics remain unverified; this offline suite cannot establish them.
+
+## Robux-only shop update
+
+Coin rewards, coin UI and coin cosmetic purchase actions are removed. Legacy profile fields remain readable. Pass ownership auto-enables independent Speed/Gravity flags; both effects apply together to Humanoid WalkSpeed 32 and JumpPower 80 on join, purchase and respawn. Owned-pass controls independently toggle the effects.
+
+A skip purchase durably grants ten stage credits. A new receipt attempts a single ten-stage delivery from a safe active run; otherwise credits await manual use. Reservations store both token and quantity, so interruption refunds the entire amount. Delivery caps at stage 101 and preserves the unused balance. Replayed receipts do not auto-deliver again. Old pending reservations without a quantity recover one credit.

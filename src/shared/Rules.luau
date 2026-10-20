@@ -4,7 +4,7 @@ local Rules = {}
 export type Profile = {
 	Version: number, Coins: number, Wins: number, Best: number, SkipCredits: number,
 	Skins: {[string]: boolean}, Skin: string, Receipts: {[string]: boolean},
-	Settings: {[string]: boolean}, PendingSkip: string?,
+	Settings: {[string]: boolean}, PendingSkip: string?, PendingSkipAmount: number?,
 }
 export type PromotionState = {nextAt: number, queued: boolean, nextKind: string, coil: string}
 
@@ -81,7 +81,10 @@ function Rules.normalize(raw: any): Profile
 			if type(raw.Settings[key]) == "boolean" then clean.Settings[key] = raw.Settings[key] end
 		end
 	end
-	if type(raw.PendingSkip) == "string" then clean.PendingSkip = raw.PendingSkip end
+	if type(raw.PendingSkip) == "string" then
+		clean.PendingSkip = raw.PendingSkip
+		clean.PendingSkipAmount = math.clamp(counter(raw.PendingSkipAmount or 1),1,10)
+	end
 	return clean
 end
 
@@ -106,19 +109,23 @@ function Rules.spendCredit(raw: any): (Profile, boolean)
 	return data, true
 end
 
-function Rules.reserveSkip(raw: any, token: string): (Profile, boolean)
+function Rules.reserveSkip(raw: any, token: string, quantity: number?): (Profile, boolean)
 	local data = Rules.normalize(raw)
-	if data.PendingSkip or data.SkipCredits < 1 then return data, false end
-	data.SkipCredits -= 1
+	local amount = quantity or 1
+	if not Rules.finite(amount) or amount%1~=0 or amount<1 or amount>10 then return data,false end
+	if data.PendingSkip or data.SkipCredits < amount then return data, false end
+	data.SkipCredits -= amount
 	data.PendingSkip = token
+	data.PendingSkipAmount = amount
 	return data, true
 end
 
 function Rules.resolveSkip(raw: any, token: string, delivered: boolean): Profile
 	local data = Rules.normalize(raw)
 	if data.PendingSkip ~= token then return data end
-	if not delivered then data.SkipCredits += 1 end
+	if not delivered then data.SkipCredits += data.PendingSkipAmount or 1 end
 	data.PendingSkip = nil
+	data.PendingSkipAmount = nil
 	return data
 end
 

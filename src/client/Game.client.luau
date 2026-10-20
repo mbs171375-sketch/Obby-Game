@@ -37,8 +37,8 @@ local hints = {
 	"Cyan spring = a gentle extra hop.", "Ride the cloud, or use the side stones.", "Two lanes. Both work. Pick your vibe.",
 }
 local settings = { Music = true, SFX = true, Promotions = true, ReducedMotion = false }
-local snapshot = { Stage = 1, Completed = 0, Coins = 0, Wins = 0, Best = 0, SkipCredits = 0,
-	Skin = "Classic", Skins = {}, Owned = {}, Catalogue = {}, Equipped = "None", Saving = false, Finished = false, Elapsed = 0 }
+local snapshot = { Stage = 1, Completed = 0, Wins = 0, Best = 0, SkipCredits = 0,
+	Skin = "Classic", Skins = {}, Owned = {}, Catalogue = {}, Equipped = {}, Saving = false, Finished = false, Elapsed = 0 }
 local received = false
 local receivedAt = os.clock()
 local promotionState = Rules.newPromotion(os.clock())
@@ -132,7 +132,7 @@ end
 local hud=frame(gui,palette.Ink,UDim2.fromOffset(12,12),UDim2.fromOffset(216,76))
 hud.Name="CornerHUD";hud.BackgroundTransparency=.16;corner(hud,12);stroke(hud)
 local stageLabel=text(hud,"STAGE 1 / 100",16,palette.White,UDim2.fromOffset(12,7),UDim2.new(1,-24,0,21),true)
-local coinsLabel=text(hud,"0 COINS",11,palette.Gold,UDim2.fromOffset(12,31),UDim2.fromOffset(100,16),true)
+local winsLabel=text(hud,"0 WINS",11,palette.Gold,UDim2.fromOffset(12,31),UDim2.fromOffset(100,16),true)
 local timerLabel=text(hud,"00:00.0",11,palette.Mint,UDim2.fromOffset(118,31),UDim2.fromOffset(80,16),true)
 local worldLabel=text(hud,"01 / NOODLE NEBULA",10,palette.Muted,UDim2.fromOffset(12,50),UDim2.new(1,-24,0,15))
 local progressTrack=frame(hud,palette.Panel,UDim2.fromOffset(12,69),UDim2.new(1,-24,0,3));corner(progressTrack,3)
@@ -150,7 +150,7 @@ local panel=frame(overlay,palette.Ink,UDim2.fromScale(.5,.5),UDim2.new(.86,0,.78
 panel.AnchorPoint=Vector2.new(.5,.5);panel.ZIndex=6;corner(panel,20);stroke(panel)
 make("UISizeConstraint",panel,{ MaxSize=Vector2.new(640,600),MinSize=Vector2.new(250,220) })
 local panelTitle=text(panel,"THE VIBE SHOP",22,palette.Mint,UDim2.fromOffset(22,16),UDim2.new(1,-90,0,30),true)
-local subtitle=text(panel,"Cosmetics use earned coins. Purchases are optional.",12,palette.Muted,UDim2.fromOffset(22,51),UDim2.new(1,-44,0,32))
+local subtitle=text(panel,"Robux purchases. Passes are permanent. Everything is optional.",12,palette.Muted,UDim2.fromOffset(22,51),UDim2.new(1,-44,0,32))
 local closeButton=button(panel,"X",UDim2.new(1,-52,0,16),UDim2.fromOffset(34,34),palette.Panel,function() end)
 local scroll=make("ScrollingFrame",panel,{ BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(18,94),
 	Size=UDim2.new(1,-36,1,-110),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=4,
@@ -213,32 +213,27 @@ updateShop=function()
 	if modal~="Shop" then return end
 	clearRows()
 	panelTitle.Text="THE VIBE SHOP"
-	subtitle.Text=string.format("%d coins • %d skip credits • everything optional",snapshot.Coins,snapshot.SkipCredits)
+	subtitle.Text=string.format("ROBUX SHOP • %d saved stage skips",snapshot.SkipCredits)
 	for _,id in {"Speed","Gravity","Skip"} do
 		local product=Config.Products[id]
 		local info=priceInfo(id)
 		local owned=snapshot.Owned[id]
 		local r=row(product.Name,product.Benefit,Color3.fromRGB(table.unpack(product.Color)),116)
 		local available=info and info.Enabled and snapshot.Saving
-		local label=if owned then (if snapshot.Equipped==id then "UNEQUIP" else "EQUIP")
+		local label=if owned then (if snapshot.Equipped[id] then "OWNED • ON" else "OWNED • OFF")
 			elseif available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
 		local buy=button(r,label,UDim2.fromOffset(12,74),UDim2.new(.65,-18,0,31),palette.Ink,function()
-			if owned then Action:FireServer("EquipCoil",if snapshot.Equipped==id then "None" else id)
+			if owned then Action:FireServer("EquipCoil",id)
 			elseif available then Action:FireServer("Buy",id) end
 		end)
 		if not available and not owned then buy.TextColor3=palette.Muted end
 		if id=="Skip" then
-			button(r,"USE CREDIT",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
-				Action:FireServer("UseSkip");closeModal()
+			button(r,if snapshot.SkipCredits>0 then "SKIP +"..tostring(math.min(10,snapshot.SkipCredits,math.max(0,101-snapshot.Stage))) else "NO SKIPS",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
+				if snapshot.SkipCredits>0 then Action:FireServer("UseSkip");closeModal() end
 			end)
 		end
 	end
-	for _,skin in Config.Skins do
-		local owned=snapshot.Skins[skin.Id] or skin.Id=="Classic"
-		local r=row(skin.Name,"Character colour + companion + matching trail",Color3.fromRGB(table.unpack(skin.Color)),112)
-		local label=if snapshot.Skin==skin.Id then "EQUIPPED" elseif owned then "EQUIP" else tostring(skin.Cost).." COINS"
-		button(r,label,UDim2.fromOffset(12,72),UDim2.new(1,-24,0,29),palette.Ink,function() Action:FireServer("Skin",skin.Id) end)
-	end
+
 end
 
 local function showSettings()
@@ -268,7 +263,7 @@ end
 settingsButton.Activated:Connect(showSettings)
 restartButton.Activated:Connect(function()
 	openModal("Restart");clearRows();panelTitle.Text=if snapshot.Finished then "ANOTHER ORBIT?" else "RESTART THIS RUN?"
-	subtitle.Text="Coins, cosmetics and unused skip credits stay. Run progress returns to stage 1."
+	subtitle.Text="Wins, passes and unused stage skips stay. Run progress returns to stage 1."
 	local r=row("Back to the lobby", "There are no permanent checkpoints.",palette.Gold,145)
 	button(r,"YES • RESTART RUN",UDim2.fromOffset(12,77),UDim2.new(1,-24,0,40),palette.Ink,function()
 		Action:FireServer("Restart");closeModal()
@@ -340,7 +335,7 @@ State.OnClientEvent:Connect(function(data)
 	end
 	worldLabel.Text=string.format("%02d / %s",zone,string.upper(worlds[zone]))
 	stageLabel.Text=if data.Finished then "100 / 100 • LEGEND!" else string.format("STAGE %d / 100",stage)
-	coinsLabel.Text=string.format("%d COINS",data.Coins)
+	winsLabel.Text=string.format("%d WINS",data.Wins)
 	animate(progressFill,{Size=UDim2.fromScale(data.Completed/100,1)},.35)
 	saveLabel.Text=if data.Saving then "" else "SESSION ONLY • SAVES OFFLINE"
 	restartButton.Text=if data.Finished then "RUN AGAIN" else "RESTART"
@@ -357,7 +352,7 @@ local function layout()
 	hud.Size=UDim2.fromOffset(if compact then 180 else 216,76)
 	stageLabel.TextSize=if compact then 14 else 16
 	worldLabel.TextSize=if compact then 9 else 10
-	coinsLabel.Size=UDim2.fromOffset(if compact then 82 else 100,16)
+	winsLabel.Size=UDim2.fromOffset(if compact then 82 else 100,16)
 	timerLabel.Position=UDim2.fromOffset(if compact then 98 else 118,31)
 	rail.Position=UDim2.new(1,if compact then -98 else -118,.5,-66)
 	rail.Size=UDim2.fromOffset(if compact then 82 else 102,172)

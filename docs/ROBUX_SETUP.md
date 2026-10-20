@@ -4,11 +4,15 @@ The creator confirmed the item types and supplied these IDs:
 
 | Item | Roblox type | ID | Benefit |
 |---|---|---|---|
-| Speed Coil | Game Pass | 2038121195 | Equip for increased running speed |
-| Jump Boot | Game Pass | 2041634630 | Equip for increased jump power |
-| 10 Stage Skips | Developer Product | 3720254856 | Adds ten durable skip credits; use one per stage |
+| Speed Coil | Game Pass | 2038121195 | WalkSpeed 32 instead of 16 |
+| Jump Boot | Game Pass | 2041634630 | JumpPower 80 instead of 50 |
+| 10 Stage Skips | Developer Product | 3720254856 | Moves forward up to ten stages in one use |
 
-Jump Boot uses the internal Gravity slot; its shop and promotional label is Jump Boot. Game Passes are permanent ownership purchases with equip/unequip controls. The Developer Product can be purchased repeatedly. Ten credits are granted atomically per unique receipt; replaying the same receipt does not grant more. Spending one credit advances only the current obstacle; unused credits remain saved. A failed/interrupted use does not silently destroy the entitlement. Death still resets run progress.
+The shop is Robux-only; coin rewards, the coin HUD/leaderboard and coin cosmetic purchases have been removed. Historical profile fields remain readable so existing saves are preserved.
+
+Both Game Passes automatically enable when ownership is confirmed on join and stay enabled after respawn. They work together. **OWNED • ON/OFF** independently toggles each actual movement effect; it never charges an owner again. Unowned passes show the live Robux Buy price. Jump Boot uses the internal Gravity slot.
+
+The repeatable Developer Product saves ten stages atomically per unique receipt. When bought from a safe island during a run, it immediately advances up to ten stages. Otherwise, the shop's **SKIP +10** button delivers them once safely stationary in the course. Near the finish, only the remaining stages are consumed; the balance stays saved. A duplicate receipt cannot repeat a grant or teleport. Failed/interrupted delivery refunds the full reserved quantity, including legacy single-stage reservations. Death still resets run progress.
 
 Prices are fetched from Roblox, including a client query for regional pricing. No Robux amount is invented or hard-coded. Items must be on sale and return valid price information. Purchasing is disabled while DataStore is unavailable. Promotions queue on a 50-second cadence and display only while the living character is grounded and still for two seconds on a safe surface. The lobby lawn/spawn and numbered islands are safe surfaces. Settings can disable reminders. The card itself never launches checkout; Buy must be selected explicitly.
 

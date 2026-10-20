@@ -19,8 +19,8 @@ The automated offline checks pass. **Roblox gameplay, physical devices, actual a
 - Ten worlds with ten stages each, original geometric mascots, floating scenery, neon edging, signs, a colourful lobby and a victory island.
 - Fourteen obstacle categories: stepping stones, zigzags, narrow beams, lava, spinners, fading tiles, conveyors, springs, moving clouds, branching lanes, vanishing moving stairs, vertical lifts, pendulum balls and touch-triggered crumble stairs.
 - A free default-jump route through every stage, including permanent side routes around timed tiles, lifts, moving clouds and swinging balls.
-- Death resets the entire run to the original lobby. There are **no respawn checkpoints**. Coins, best progress, wins, cosmetics and unused skip credits are separate from run progress.
-- Earn two coins per completed intermediate stage and 100 bonus coins at the finish. Five character palettes with matching trails and original companions use earned coins.
+- Death resets the entire run to the original lobby. There are **no respawn checkpoints**. Best progress, wins, passes and unused stage skips are separate from run progress.
+- Robux-only shop: no coin counter, coin rewards or coin cosmetics for sale. Previously saved profiles are preserved.
 - Server-owned progression, default Roblox player-list leaderboard, run timer, restart confirmation and optional coil/skip shop.
 - Speed Coil and Jump Boot Game Passes; a repeatable ten-credit stage-skip Developer Product; replay-safe receipt processing; server checks on ownership, proximity, order and request frequency.
 - Optional promotion cards checked every 50 seconds, alternating coil and skip offers. Cards queue until two safe stationary seconds, disappear on movement, dismiss with X, and never automatically open checkout.
@@ -44,7 +44,9 @@ The creator supplied and confirmed these connected items. See [Robux setup and p
 | Jump Boot | Game Pass | `2041634630` |
 | 10 Stage Skips | Developer Product | `3720254856` |
 
-Each skip purchase adds **10 saved credits**, usable one at a time. Repeated receipts never duplicate the pack. Unused credits persist; death still resets run progress. Jump Boot uses the internal Gravity slot. Cosmetics still use earned coins.
+Each confirmed skip purchase moves forward **up to 10 stages at once** from a safe island. If airborne or outside an active run, the purchase is saved: use **SKIP +10** in the shop once safely standing in the course. Near the finish, unused stages remain saved. Duplicate receipts never repeat the teleport or grant. Death still resets run progress.
+
+Owned passes automatically enable on join and respawn: Speed Coil increases WalkSpeed from **16 to 32**, and Jump Boot increases JumpPower from **50 to 80**. Both work together and can be toggled independently using **OWNED • ON/OFF**. Players without a pass see its live Robux price.
 
 Prices come from Roblox, including regional client pricing; no Robux amount is hard-coded. Both passes must be on sale and the products must belong to the experience you publish over. Purchases require available DataStore persistence. Lobby and numbered safe islands can display optional offers after the 50-second cadence and two stationary seconds. Settings can turn reminders off.
 

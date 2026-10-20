@@ -87,12 +87,23 @@ expect(findText("BUY • R$ 20","TextButton")~=nil,"shop uses player's locally f
 local packRow=findText("10 Stage Skips","TextLabel").Parent
 local packBuy=false
 for _,child in packRow:GetChildren() do if child.Text=="BUY • R$ 20" then packBuy=true end end
+expect(findText("0 COINS")==nil and findText("30 COINS")==nil,"coin HUD and cosmetics removed")
 expect(packBuy,"ten-pack can be bought when Developer Product metadata omits IsForSale")
 local prompts=#ctx.market.prompts
 expect(prompts>0,"fixture includes earlier server tests")
 local buy=findText("BUY • R$ 20","TextButton")
 buy.Activated:Fire()
 expect(#ctx.market.prompts==prompts+1,"deliberate buy activation prompts purchase")
+ctx.market.owns['10:101']=true
+ctx.market.PromptGamePassPurchaseFinished:Fire(p,101,true)
+expect(findText("OWNED • ON","TextButton")~=nil,"owned pass is clearly labelled and enabled")
+ctx.step(2);click("OWNED • ON")
+expect(p.Character.Humanoid.WalkSpeed==16 and findText("OWNED • OFF","TextButton")~=nil,"owned-pass control disables the actual ability")
+ctx.step(2);click("OWNED • OFF")
+expect(p.Character.Humanoid.WalkSpeed==32,"owned-pass control reenables actual speed")
+-- Restore unowned fixture state for promotion tests below.
+ctx.market.owns['10:101']=false
+ctx.market.PromptGamePassPurchaseFinished:Fire(p,101,true)
 click("X")
 click("SETTINGS")
 local function settingToggle(label)

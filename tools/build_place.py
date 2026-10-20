@@ -241,15 +241,15 @@ class Place:
         self.text(board,'BRAINROT ORBIT\n100 STAGES • ONE RUN\nHOP. HONK. REPEAT.',face=5)
         self.text(board,'BRAINROT ORBIT\n100 STAGES • ONE RUN\nHOP. HONK. REPEAT.',face=2)
         guide=self.part(lobby,'Rules sign',plus(first,(-23,5,-22)),(16,7,1),(49,39,88),solid=False)
-        self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=5)
-        self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=2)
+        self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nWins & passes stay.\nEvery stage is free.',face=5)
+        self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nWins & passes stay.\nEvery stage is free.',face=2)
         rivals=self.part(lobby,'NPC Rivals Board',plus(first,(0,17,-18)),(29,14,1),(35,25,65),solid=False)
         rival_text='NPC RIVALS\nFICTIONAL TIMES • NOT PLAYER RECORDS\n1. TungTurbo        00:24.08\n2. CappuccinoJet    00:31.42\n3. SharkOnSkates    00:38.16\n4. CrocoExpress     00:46.90\nCan your last brain cell keep up?'
         self.text(rivals,rival_text,face=5);self.text(rivals,rival_text,face=2)
         self.mascot(lobby,'frog',plus(first,(25,5,-26)),(123,255,142),1.4)
         self.brainrot(lobby,'tung',plus(first,(-24,7,-7)),1.1)
         self.brainrot(lobby,'coffee',plus(first,(24,7,-8)),1,2)
-        for x,z,title,color in ((-25,-42,'COIL CLUB',(255,218,111)),(25,-44,'BUDDY BOUTIQUE',(255,145,211))):
+        for x,z,title,color in ((-25,-42,'COIL CLUB',(255,218,111)),(25,-44,'STAGE SKIP SHOP',(255,145,211))):
             stand=self.part(lobby,title,plus(first,(x,2,z)),(12,4,7),(74,53,117))
             self.part(lobby,'Kiosk canopy',plus(first,(x,10,z)),(15,1,10),color,solid=False)
             for side in (-6,6):self.part(lobby,'Kiosk pole',plus(first,(x+side,6,z+3)),(.6,8,.6),color,solid=False)

@@ -23,12 +23,53 @@ expect(ctx.market.ProcessReceipt(receipt)=="PurchaseGranted" and state().SkipCre
 expect(ctx.market.ProcessReceipt(receipt)=="PurchaseGranted" and state().SkipCredits==10,"duplicate receipt cannot become twenty credits")
 ctx.touch(p,1);ctx.step(1);ctx.setFloor(ctx.world.Stages.Stage001.SafePad)
 ctx.action:Fire(p,"UseSkip")
-expect(state().Stage==2 and state().SkipCredits==9,"ten-pack is spent one stage at a time")
+expect(state().Stage==11 and state().SkipCredits==0,"one use moves forward ten stages")
 ctx.market.owns['123:2038121195']=true
 ctx.market.PromptGamePassPurchaseFinished:Fire(p,2038121195,true)
-expect(p.Character.Humanoid.WalkSpeed==23,"configured Speed Pass grants speed after ownership check")
+expect(p.Character.Humanoid.WalkSpeed==32,"configured Speed Pass grants speed after ownership check")
 ctx.market.owns['123:2041634630']=true
 ctx.market.PromptGamePassPurchaseFinished:Fire(p,2041634630,true)
-expect(p.Character.Humanoid.JumpPower==62,"configured Jump Boot Pass grants higher jump after ownership check")
+expect(p.Character.Humanoid.JumpPower==80,"configured Jump Boot Pass grants higher jump after ownership check")
+expect(p.Character.Humanoid.WalkSpeed==32 and p.Character.Humanoid.JumpPower==80,"both owned boosts work together")
+ctx.step(2);ctx.action:Fire(p,"EquipCoil","Speed")
+expect(p.Character.Humanoid.WalkSpeed==16 and p.Character.Humanoid.JumpPower==80,"speed toggle preserves jump boost")
+ctx.step(2);ctx.action:Fire(p,"EquipCoil","Speed")
+expect(p.Character.Humanoid.WalkSpeed==32,"speed toggle restores boost")
+p.CharacterAdded:Fire(p.Character)
+expect(p.Character.Humanoid.WalkSpeed==32 and p.Character.Humanoid.JumpPower==80,"boosts survive respawn")
+ctx.touch(p,1);ctx.setFloor(ctx.world.Stages.Stage001.SafePad)
+receipt.PurchaseId="automatic-ten-stage-skip"
+expect(ctx.market.ProcessReceipt(receipt)=="PurchaseGranted" and state().Stage==11 and state().SkipCredits==0,"confirmed purchase automatically advances ten stages from safety")
+expect(ctx.market.ProcessReceipt(receipt)=="PurchaseGranted" and state().Stage==11 and state().SkipCredits==0,"receipt replay never teleports again")
+for i=12,95 do ctx.step(1);ctx.touch(p,i) end
+ctx.setFloor(ctx.world.Stages.Stage095.SafePad)
+receipt.PurchaseId="finish-cap"
+expect(ctx.market.ProcessReceipt(receipt)=="PurchaseGranted" and state().Finished,"skip near finish caps at final stage")
+expect(state().SkipCredits==4,"unused portion of ten stages stays saved")
+expect(p.Character.HumanoidRootPart.Position.Y>ctx.world.VictoryIsland.FinishPad.Position.Y,"finish skip lands at the mouth finish pad")
+ctx.market.owns['124:2038121195']=true;ctx.market.owns['124:2041634630']=true
+local owned=ctx.addPlayer(124)
+expect(owned.Character.Humanoid.WalkSpeed==32 and owned.Character.Humanoid.JumpPower==80,"existing owners automatically receive both boosts on join")
+-- Interrupt the actual production reservation between durable write and delivery.
+ctx.touch(owned,1);ctx.setFloor(nil)
+local interruption={PlayerId=124,ProductId=3720254856,PurchaseId="interrupted-use"}
+expect(ctx.market.ProcessReceipt(interruption)=="PurchaseGranted" and ctx.state(owned).SkipCredits==10,"unsafe purchase saves all ten for later use")
+ctx.setFloor(ctx.world.Stages.Stage001.SafePad)
+local originalUpdate=ctx.storage.UpdateAsync
+local interrupt=true
+function ctx.storage:UpdateAsync(key,fn)
+	local value=originalUpdate(self,key,fn)
+	if interrupt and key=="player:124" and value and value.PendingSkip then
+		interrupt=false
+		owned.Character.Humanoid.Died:Fire()
+	end
+	return value
+end
+ctx.step(2);ctx.action:Fire(owned,"UseSkip")
+expect(ctx.state(owned).SkipCredits==10 and ctx.state(owned).Stage==1,"interrupted ten-stage teleport refunds all ten")
+expect(ctx.storage.records["player:124"].PendingSkip==nil,"failed delivery clears the reservation")
+ctx.storage.UpdateAsync=originalUpdate
+ctx.touch(owned,1);ctx.step(2);ctx.action:Fire(owned,"UseSkip")
+expect(ctx.state(owned).Stage==11 and ctx.state(owned).SkipCredits==0,"refunded purchase can successfully deliver ten stages later")
 expect(#ctx.errors==0,table.concat(ctx.errors,"\n"))
 print(string.format("PASS: %d configured-product wiring assertions with service doubles (no real payments)",checks))

@@ -15,27 +15,27 @@ test_original_place_preserved (test_map.MapTests.test_original_place_preserved) 
 test_unique_referents_and_valid_instance_parents (test_map.MapTests.test_unique_referents_and_valid_instance_parents) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 2.200s
+Ran 11 tests in 1.674s
 
 OK
 
 + /workspace/obby-tools/luau-compile src/client/Game.client.luau src/server/Game.server.luau src/shared/Config.luau src/shared/Rules.luau --null
-Compiled 1 KLOC into 63 KB bytecode (read 0.00s, parse 0.00s, compile 0.00s)
+Compiled 1 KLOC into 62 KB bytecode (read 0.00s, parse 0.00s, compile 0.00s)
 
 + /workspace/obby-tools/luau-analyze src/shared/Rules.luau src/shared/Config.luau
 
 + /workspace/obby-tools/luau tests/rules.spec.luau
-PASS: 68 game-rule assertions
+PASS: 74 game-rule assertions
 
 + /workspace/obby-tools/lune run tests/client.spec.luau
-PASS: 65 production-server assertions with service doubles (not engine playtests)
-PASS: 38 client-wiring assertions with service doubles (not visual/device tests)
+PASS: 62 production-server assertions with service doubles (not engine playtests)
+PASS: 42 client-wiring assertions with service doubles (not visual/device tests)
 
 + /workspace/obby-tools/lune run tests/offline.spec.luau
 PASS: 16 shipped-default/unpublished-place assertions with service doubles
 
 + /workspace/obby-tools/lune run tests/products.spec.luau
-PASS: 16 configured-product wiring assertions with service doubles (no real payments)
+PASS: 30 configured-product wiring assertions with service doubles (no real payments)
 
 + /workspace/obby-tools/lune run tests/place.spec.luau
 PASS: 6708 Roblox serialization assertions; 6292 parts; XML and binary places written

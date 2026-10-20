@@ -308,7 +308,7 @@ HOP. HONK. REPEAT.</string>
                 <float name="BackgroundTransparency">1</float>
                 <string name="Text">NO CHECKPOINTS
 Death resets your run.
-Coins &amp; cosmetics stay.
+Wins &amp; passes stay.
 Every stage is free.</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">true</bool>
@@ -342,7 +342,7 @@ Every stage is free.</string>
                 <float name="BackgroundTransparency">1</float>
                 <string name="Text">NO CHECKPOINTS
 Death resets your run.
-Coins &amp; cosmetics stay.
+Wins &amp; passes stay.
 Every stage is free.</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">true</bool>
@@ -2793,7 +2793,7 @@ Can your last brain cell keep up?</string>
         </Item>
         <Item class="Part" referent="RBX96">
           <Properties>
-            <string name="Name">BUDDY BOUTIQUE</string>
+            <string name="Name">STAGE SKIP SHOP</string>
             <bool name="Anchored">true</bool>
             <bool name="CanCollide">true</bool>
             <bool name="CanTouch">true</bool>
@@ -2833,7 +2833,7 @@ Can your last brain cell keep up?</string>
             <Properties>
               <string name="Name">OpenShop</string>
               <string name="ActionText">Browse shop</string>
-              <string name="ObjectText">BUDDY BOUTIQUE</string>
+              <string name="ObjectText">STAGE SKIP SHOP</string>
               <float name="MaxActivationDistance">12</float>
               <bool name="RequiresLineOfSight">false</bool>
               <float name="HoldDuration">0</float>
@@ -3014,7 +3014,7 @@ Can your last brain cell keep up?</string>
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <string name="Text">BUDDY BOUTIQUE</string>
+                <string name="Text">STAGE SKIP SHOP</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">true</bool>
                 <token name="Font">20</token>
@@ -3045,7 +3045,7 @@ Can your last brain cell keep up?</string>
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <string name="Text">BUDDY BOUTIQUE</string>
+                <string name="Text">STAGE SKIP SHOP</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">true</bool>
                 <token name="Font">20</token>
@@ -262882,15 +262882,13 @@ return {
 	PromotionInterval = 50,
 	BaseWalkSpeed = 16,
 	BaseJumpPower = 50,
-	SpeedCoilSpeed = 23,
-	GravityCoilJump = 62,
-	StageCoins = 2,
-	WinCoins = 100,
+	SpeedCoilSpeed = 32,
+	GravityCoilJump = 80,
 	DataStoreName = "BrainrotOrbit_v1",
 	Products = {
-		Speed = { Id = 2038121195, Kind = "Pass", Name = "Speed Coil", Benefit = "Run faster while equipped", Color = {255, 208, 68} },
-		Gravity = { Id = 2041634630, Kind = "Pass", Name = "Jump Boot", Benefit = "Jump higher while equipped", Color = {157, 117, 255} },
-		Skip = { Id = 3720254856, Kind = "Product", Credits = 10, Name = "10 Stage Skips", Benefit = "10 saved credits; use one per stage", Color = {63, 237, 213} },
+		Speed = { Id = 2038121195, Kind = "Pass", Name = "Speed Coil", Benefit = "Double your running speed; works with Jump Boot", Color = {255, 208, 68} },
+		Gravity = { Id = 2041634630, Kind = "Pass", Name = "Jump Boot", Benefit = "Higher jumps; works with Speed Coil", Color = {157, 117, 255} },
+		Skip = { Id = 3720254856, Kind = "Product", Credits = 10, Name = "10 Stage Skips", Benefit = "Move forward up to 10 stages at once", Color = {63, 237, 213} },
 	},
 	Skins = {
 		{ Id = "Classic", Name = "Orbit Explorer", Cost = 0, Color = {100, 211, 255} },
@@ -262917,7 +262915,7 @@ local Rules = {}
 export type Profile = {
 	Version: number, Coins: number, Wins: number, Best: number, SkipCredits: number,
 	Skins: {[string]: boolean}, Skin: string, Receipts: {[string]: boolean},
-	Settings: {[string]: boolean}, PendingSkip: string?,
+	Settings: {[string]: boolean}, PendingSkip: string?, PendingSkipAmount: number?,
 }
 export type PromotionState = {nextAt: number, queued: boolean, nextKind: string, coil: string}
 
@@ -262994,7 +262992,10 @@ function Rules.normalize(raw: any): Profile
 			if type(raw.Settings[key]) == "boolean" then clean.Settings[key] = raw.Settings[key] end
 		end
 	end
-	if type(raw.PendingSkip) == "string" then clean.PendingSkip = raw.PendingSkip end
+	if type(raw.PendingSkip) == "string" then
+		clean.PendingSkip = raw.PendingSkip
+		clean.PendingSkipAmount = math.clamp(counter(raw.PendingSkipAmount or 1),1,10)
+	end
 	return clean
 end
 
@@ -263019,19 +263020,23 @@ function Rules.spendCredit(raw: any): (Profile, boolean)
 	return data, true
 end
 
-function Rules.reserveSkip(raw: any, token: string): (Profile, boolean)
+function Rules.reserveSkip(raw: any, token: string, quantity: number?): (Profile, boolean)
 	local data = Rules.normalize(raw)
-	if data.PendingSkip or data.SkipCredits &lt; 1 then return data, false end
-	data.SkipCredits -= 1
+	local amount = quantity or 1
+	if not Rules.finite(amount) or amount%1~=0 or amount&lt;1 or amount&gt;10 then return data,false end
+	if data.PendingSkip or data.SkipCredits &lt; amount then return data, false end
+	data.SkipCredits -= amount
 	data.PendingSkip = token
+	data.PendingSkipAmount = amount
 	return data, true
 end
 
 function Rules.resolveSkip(raw: any, token: string, delivered: boolean): Profile
 	local data = Rules.normalize(raw)
 	if data.PendingSkip ~= token then return data end
-	if not delivered then data.SkipCredits += 1 end
+	if not delivered then data.SkipCredits += data.PendingSkipAmount or 1 end
 	data.PendingSkip = nil
+	data.PendingSkipAmount = nil
 	return data
 end
 
@@ -263136,11 +263141,10 @@ local function view(player)
 	if stats then
 		stats.Stage.Value = completed
 		stats.Wins.Value = s.data.Wins + s.pending.Wins
-		stats.Coins.Value = s.data.Coins + s.pending.Coins
 	end
 	State:FireClient(player, {
 		Stage = s.run.stage, Completed = completed, Finished = s.run.finished,
-		Coins = s.data.Coins + s.pending.Coins, Wins = s.data.Wins + s.pending.Wins,
+		Wins = s.data.Wins + s.pending.Wins,
 		Best = math.max(s.data.Best, s.pending.Best), SkipCredits = s.data.SkipCredits,
 		Skin = s.data.Skin, Skins = s.data.Skins, Equipped = s.equipped,
 		Owned = s.owned, Catalogue = catalogue, Saving = s.persistent and s.saveHealthy,
@@ -263311,15 +263315,15 @@ local function applyCoil(player)
 	local root = char and char:FindFirstChild("HumanoidRootPart")
 	if not s or not hum or not root then return end
 	hum.UseJumpPower = true
-	local speed = if s.equipped == "Speed" then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
+	local speed = if s.equipped.Speed then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
 	hum.WalkSpeed = if (s.boostUntil or 0) &gt; os.clock() then math.max(speed,22) else speed
-	hum.JumpPower = if s.equipped == "Gravity" then Config.GravityCoilJump else Config.BaseJumpPower
+	hum.JumpPower = if s.equipped.Gravity then Config.GravityCoilJump else Config.BaseJumpPower
 	local previous = char:FindFirstChild("EquippedCoil")
 	if previous then previous:Destroy() end
-	if s.equipped == "None" then return end
+	if not s.equipped.Speed and not s.equipped.Gravity then return end
 	local coil = Instance.new("Model")
 	coil.Name = "EquippedCoil"; coil.Parent = char
-	local color = Color3.fromRGB(table.unpack(Config.Products[s.equipped].Color))
+	local color = Color3.fromRGB(table.unpack(Config.Products[if s.equipped.Speed then "Speed" else "Gravity"].Color))
 	for i = 1, 6 do
 		local ring = Instance.new("Part")
 		ring.Name = "CoilRing"; ring.Shape = Enum.PartType.Cylinder
@@ -263337,8 +263341,8 @@ local function complete(player)
 	if not s or s.run.finished then return end
 	s.run.stage = 101; s.run.finished = true
 	s.run.duration = if s.run.started then workspace:GetServerTimeNow() - s.run.started else 0
-	s.pending.Coins += Config.WinCoins; s.pending.Wins += 1; s.pending.Best = 100
-	notice(player, "100 STAGES! +100 coins. Your last brain cell is legendary.", "Win")
+	s.pending.Wins += 1; s.pending.Best = 100
+	notice(player, "100 STAGES! Your last brain cell is legendary.", "Win")
 	view(player)
 	task.spawn(function() flush(player); view(player) end)
 end
@@ -263348,7 +263352,6 @@ local function advance(player, target)
 	if not s or s.run.finished then return end
 	if target == 101 then complete(player); return end
 	s.run.stage = target
-	s.pending.Coins += Config.StageCoins
 	s.pending.Best = math.max(s.pending.Best, target - 1)
 	view(player)
 	if (target - 1) % 10 == 0 then notice(player, "NEW WORLD! " .. pads[target].Parent.Theme.Value, "World") end
@@ -263508,9 +263511,15 @@ local function loadOwnership(player)
 	for name, product in Config.Products do
 		if product.Kind == "Pass" and product.Id &gt; 0 then
 			local ok, owns = pcall(MarketplaceService.UserOwnsGamePassAsync, MarketplaceService, player.UserId, product.Id)
-			if ok and sessions[player] == s then s.owned[name] = owns end
+			if ok and sessions[player] == s then
+				local firstOwned = owns and not s.owned[name]
+				s.owned[name] = owns
+				if firstOwned then s.equipped[name] = true end
+				if not owns then s.equipped[name] = false end
+			end
 		end
 	end
+	applyCoil(player)
 	view(player)
 end
 
@@ -263525,7 +263534,7 @@ local function setupPlayer(player)
 	if not player.Parent then loading[player] = nil; return end
 	local data = Rules.normalize(if ok then raw else nil)
 	sessions[player] = { data = data, pending = { Coins = 0, Wins = 0, Best = 0 },
-		persistent = ok, saveHealthy = ok, flushing = false, busy = false, equipped = "None", owned = {},
+		persistent = ok, saveHealthy = ok, flushing = false, busy = false, equipped = {}, owned = {},
 		run = { stage = 1, started = nil, finished = false, lastAdvance = 0 }, tokens = 10, tokenAt = os.clock() }
 	loading[player] = nil
 	-- Recover a reservation interrupted by a crash/death; no purchase can silently disappear.
@@ -263536,7 +263545,7 @@ local function setupPlayer(player)
 	end
 	if not player.Parent or not sessions[player] then return end
 	local stats = Instance.new("Folder"); stats.Name = "leaderstats"; stats.Parent = player
-	for _, name in { "Stage", "Wins", "Coins" } do
+	for _, name in { "Stage", "Wins" } do
 		local value = Instance.new("IntValue"); value.Name = name; value.Parent = stats
 	end
 	local function characterAdded(char)
@@ -263555,7 +263564,7 @@ local function setupPlayer(player)
 	end
 	player.CharacterAdded:Connect(characterAdded)
 	player.CharacterAppearanceLoaded:Connect(function(char)
-		if player.Character == char then applyLook(player) end
+		if player.Character == char then applyLook(player); applyCoil(player) end
 	end)
 	if player.Character then task.spawn(characterAdded, player.Character) end
 	if not ok then
@@ -263574,25 +263583,27 @@ local function useSkip(player)
 	local originalRun = s.run
 	local originalStage = originalRun.stage
 	if s.data.SkipCredits &lt;= 0 then notice(player,"No skip credits available."); return end
+	local amount = math.min(10,s.data.SkipCredits,101-originalStage)
+	local target = originalStage + amount
 	local spent = false
 	local token = HttpService:GenerateGUID(false)
 	local result = update(player, function(data)
-		local updated, didSpend = Rules.reserveSkip(data,token)
+		local updated, didSpend = Rules.reserveSkip(data,token,amount)
 		spent = didSpend
 		return updated
 	end)
 	if not result or not spent then notice(player,"Credit could not be used. Try again later.","Warning"); return end
 	s.data = result
-	if s.run ~= originalRun or s.run.stage ~= originalStage or not moveTo(player,pads[originalStage+1]) then
+	if s.run ~= originalRun or s.run.stage ~= originalStage or not moveTo(player,pads[target]) then
 		-- A death or disconnect during storage must not destroy the unused purchase.
 		local refunded = update(player,function(data) return Rules.resolveSkip(data,token,false) end)
 		if refunded then s.data = refunded end
 		notice(player,if refunded then "Run changed. Your credit was returned." else "Credit recovery queued. Rejoin when saves are available.","Warning"); view(player); return
 	end
-	advance(player, originalStage+1)
+	advance(player, target)
 	local settled = update(player,function(data) return Rules.resolveSkip(data,token,true) end)
 	if settled then s.data = settled end
-	notice(player,"Stage skipped. Death still resets the entire run.")
+	notice(player,string.format("Skipped %d stages! Death still resets the entire run.",amount))
 	view(player)
 end
 
@@ -263611,30 +263622,13 @@ Action.OnServerEvent:Connect(function(player, action, argument)
 		if action == "Restart" then
 			resetRun(player); moveTo(player, World.Lobby.OriginalStart)
 		elseif action == "EquipCoil" then
-			if argument == "None" or ((argument == "Speed" or argument == "Gravity") and s.owned[argument]) then
-				s.equipped = argument; applyCoil(player); view(player)
+			if argument == "None" then
+				s.equipped = {}; applyCoil(player); view(player)
+			elseif (argument == "Speed" or argument == "Gravity") and s.owned[argument] then
+				s.equipped[argument] = not s.equipped[argument]; applyCoil(player); view(player)
 			end
 		elseif action == "UseSkip" then
 			useSkip(player)
-		elseif action == "Skin" then
-			local skin
-			for _, item in Config.Skins do if item.Id == argument then skin = item end end
-			if not skin then return end
-			if s.persistent then
-				if not flush(player) then notice(player,"Save unavailable. Try again later.","Warning"); return end
-				local bought = false
-				local result = update(player, function(data)
-					local updated, success = Rules.buySkin(data,skin.Id,skin.Cost); bought = success; return updated
-				end)
-				if not result or not bought then notice(player,"Not enough coins or save unavailable."); return end
-				s.data = result
-			else
-				local available = table.clone(s.data); available.Coins += s.pending.Coins
-				local result, bought = Rules.buySkin(available,skin.Id,skin.Cost)
-				if not bought then notice(player,"Earn more coins by completing stages."); return end
-				s.pending.Coins = 0; s.data = result
-			end
-			applyLook(player); view(player)
 		elseif action == "Settings" then
 			if not argument then return end
 			local name, value = argument:match("^(%a+):(%a+)$")
@@ -263668,7 +263662,7 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player,id,pur
 			task.spawn(function()
 				loadOwnership(player)
 				local s = sessions[player]
-				if s and s.owned[name] then s.equipped = name; applyCoil(player); view(player) end
+				if s and s.owned[name] then s.equipped[name] = true; applyCoil(player); view(player) end
 			end)
 		end
 	end
@@ -263679,14 +263673,23 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	local s = player and sessions[player]
 	if not s or not s.persistent then return IN_FLIGHT end
+	local newlyGranted = false
 	local result = update(player,function(data)
-		local updated = Rules.grantReceipt(data,tostring(receipt.PurchaseId),Config.Products.Skip.Credits)
+		local updated, granted = Rules.grantReceipt(data,tostring(receipt.PurchaseId),Config.Products.Skip.Credits)
+		newlyGranted = granted
 		return updated
 	end)
 	if not result or not result.Receipts[tostring(receipt.PurchaseId)] then return IN_FLIGHT end
 	s.data = result
 	view(player)
-	notice(player,string.format("%d skip credits saved. Use one from a safe island when you choose.",result.SkipCredits))
+	if newlyGranted and not s.busy and s.run.started and not s.run.finished and safeFloor(player) then
+		s.busy = true
+		local ok, err = pcall(useSkip,player)
+		s.busy = false
+		if not ok then warn("[Orbit] Saved skip awaits manual use",err) end
+	elseif newlyGranted then
+		notice(player,"10 stage skips saved! Stand on a safe island and press SKIP +10 in the shop.")
+	end
 	return GRANTED
 end
 
@@ -263783,8 +263786,8 @@ local hints = {
 	"Cyan spring = a gentle extra hop.", "Ride the cloud, or use the side stones.", "Two lanes. Both work. Pick your vibe.",
 }
 local settings = { Music = true, SFX = true, Promotions = true, ReducedMotion = false }
-local snapshot = { Stage = 1, Completed = 0, Coins = 0, Wins = 0, Best = 0, SkipCredits = 0,
-	Skin = "Classic", Skins = {}, Owned = {}, Catalogue = {}, Equipped = "None", Saving = false, Finished = false, Elapsed = 0 }
+local snapshot = { Stage = 1, Completed = 0, Wins = 0, Best = 0, SkipCredits = 0,
+	Skin = "Classic", Skins = {}, Owned = {}, Catalogue = {}, Equipped = {}, Saving = false, Finished = false, Elapsed = 0 }
 local received = false
 local receivedAt = os.clock()
 local promotionState = Rules.newPromotion(os.clock())
@@ -263878,7 +263881,7 @@ end
 local hud=frame(gui,palette.Ink,UDim2.fromOffset(12,12),UDim2.fromOffset(216,76))
 hud.Name="CornerHUD";hud.BackgroundTransparency=.16;corner(hud,12);stroke(hud)
 local stageLabel=text(hud,"STAGE 1 / 100",16,palette.White,UDim2.fromOffset(12,7),UDim2.new(1,-24,0,21),true)
-local coinsLabel=text(hud,"0 COINS",11,palette.Gold,UDim2.fromOffset(12,31),UDim2.fromOffset(100,16),true)
+local winsLabel=text(hud,"0 WINS",11,palette.Gold,UDim2.fromOffset(12,31),UDim2.fromOffset(100,16),true)
 local timerLabel=text(hud,"00:00.0",11,palette.Mint,UDim2.fromOffset(118,31),UDim2.fromOffset(80,16),true)
 local worldLabel=text(hud,"01 / NOODLE NEBULA",10,palette.Muted,UDim2.fromOffset(12,50),UDim2.new(1,-24,0,15))
 local progressTrack=frame(hud,palette.Panel,UDim2.fromOffset(12,69),UDim2.new(1,-24,0,3));corner(progressTrack,3)
@@ -263896,7 +263899,7 @@ local panel=frame(overlay,palette.Ink,UDim2.fromScale(.5,.5),UDim2.new(.86,0,.78
 panel.AnchorPoint=Vector2.new(.5,.5);panel.ZIndex=6;corner(panel,20);stroke(panel)
 make("UISizeConstraint",panel,{ MaxSize=Vector2.new(640,600),MinSize=Vector2.new(250,220) })
 local panelTitle=text(panel,"THE VIBE SHOP",22,palette.Mint,UDim2.fromOffset(22,16),UDim2.new(1,-90,0,30),true)
-local subtitle=text(panel,"Cosmetics use earned coins. Purchases are optional.",12,palette.Muted,UDim2.fromOffset(22,51),UDim2.new(1,-44,0,32))
+local subtitle=text(panel,"Robux purchases. Passes are permanent. Everything is optional.",12,palette.Muted,UDim2.fromOffset(22,51),UDim2.new(1,-44,0,32))
 local closeButton=button(panel,"X",UDim2.new(1,-52,0,16),UDim2.fromOffset(34,34),palette.Panel,function() end)
 local scroll=make("ScrollingFrame",panel,{ BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(18,94),
 	Size=UDim2.new(1,-36,1,-110),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=4,
@@ -263959,32 +263962,27 @@ updateShop=function()
 	if modal~="Shop" then return end
 	clearRows()
 	panelTitle.Text="THE VIBE SHOP"
-	subtitle.Text=string.format("%d coins • %d skip credits • everything optional",snapshot.Coins,snapshot.SkipCredits)
+	subtitle.Text=string.format("ROBUX SHOP • %d saved stage skips",snapshot.SkipCredits)
 	for _,id in {"Speed","Gravity","Skip"} do
 		local product=Config.Products[id]
 		local info=priceInfo(id)
 		local owned=snapshot.Owned[id]
 		local r=row(product.Name,product.Benefit,Color3.fromRGB(table.unpack(product.Color)),116)
 		local available=info and info.Enabled and snapshot.Saving
-		local label=if owned then (if snapshot.Equipped==id then "UNEQUIP" else "EQUIP")
+		local label=if owned then (if snapshot.Equipped[id] then "OWNED • ON" else "OWNED • OFF")
 			elseif available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
 		local buy=button(r,label,UDim2.fromOffset(12,74),UDim2.new(.65,-18,0,31),palette.Ink,function()
-			if owned then Action:FireServer("EquipCoil",if snapshot.Equipped==id then "None" else id)
+			if owned then Action:FireServer("EquipCoil",id)
 			elseif available then Action:FireServer("Buy",id) end
 		end)
 		if not available and not owned then buy.TextColor3=palette.Muted end
 		if id=="Skip" then
-			button(r,"USE CREDIT",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
-				Action:FireServer("UseSkip");closeModal()
+			button(r,if snapshot.SkipCredits&gt;0 then "SKIP +"..tostring(math.min(10,snapshot.SkipCredits,math.max(0,101-snapshot.Stage))) else "NO SKIPS",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
+				if snapshot.SkipCredits&gt;0 then Action:FireServer("UseSkip");closeModal() end
 			end)
 		end
 	end
-	for _,skin in Config.Skins do
-		local owned=snapshot.Skins[skin.Id] or skin.Id=="Classic"
-		local r=row(skin.Name,"Character colour + companion + matching trail",Color3.fromRGB(table.unpack(skin.Color)),112)
-		local label=if snapshot.Skin==skin.Id then "EQUIPPED" elseif owned then "EQUIP" else tostring(skin.Cost).." COINS"
-		button(r,label,UDim2.fromOffset(12,72),UDim2.new(1,-24,0,29),palette.Ink,function() Action:FireServer("Skin",skin.Id) end)
-	end
+
 end
 
 local function showSettings()
@@ -264014,7 +264012,7 @@ end
 settingsButton.Activated:Connect(showSettings)
 restartButton.Activated:Connect(function()
 	openModal("Restart");clearRows();panelTitle.Text=if snapshot.Finished then "ANOTHER ORBIT?" else "RESTART THIS RUN?"
-	subtitle.Text="Coins, cosmetics and unused skip credits stay. Run progress returns to stage 1."
+	subtitle.Text="Wins, passes and unused stage skips stay. Run progress returns to stage 1."
 	local r=row("Back to the lobby", "There are no permanent checkpoints.",palette.Gold,145)
 	button(r,"YES • RESTART RUN",UDim2.fromOffset(12,77),UDim2.new(1,-24,0,40),palette.Ink,function()
 		Action:FireServer("Restart");closeModal()
@@ -264086,7 +264084,7 @@ State.OnClientEvent:Connect(function(data)
 	end
 	worldLabel.Text=string.format("%02d / %s",zone,string.upper(worlds[zone]))
 	stageLabel.Text=if data.Finished then "100 / 100 • LEGEND!" else string.format("STAGE %d / 100",stage)
-	coinsLabel.Text=string.format("%d COINS",data.Coins)
+	winsLabel.Text=string.format("%d WINS",data.Wins)
 	animate(progressFill,{Size=UDim2.fromScale(data.Completed/100,1)},.35)
 	saveLabel.Text=if data.Saving then "" else "SESSION ONLY • SAVES OFFLINE"
 	restartButton.Text=if data.Finished then "RUN AGAIN" else "RESTART"
@@ -264103,7 +264101,7 @@ local function layout()
 	hud.Size=UDim2.fromOffset(if compact then 180 else 216,76)
 	stageLabel.TextSize=if compact then 14 else 16
 	worldLabel.TextSize=if compact then 9 else 10
-	coinsLabel.Size=UDim2.fromOffset(if compact then 82 else 100,16)
+	winsLabel.Size=UDim2.fromOffset(if compact then 82 else 100,16)
 	timerLabel.Position=UDim2.fromOffset(if compact then 98 else 118,31)
 	rail.Position=UDim2.new(1,if compact then -98 else -118,.5,-66)
 	rail.Size=UDim2.fromOffset(if compact then 82 else 102,172)

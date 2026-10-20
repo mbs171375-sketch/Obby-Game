@@ -13,11 +13,11 @@ Run `python3 tools/verify.py --tools /workspace/obby-tools` in this cloud enviro
 | Map topology and generation | PASS | 11 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
 | Luau compilation | PASS | All four production source files compiled using Luau 0.743 |
 | Shared-module strict type checks | PASS | `luau-analyze` passes Rules and Config; engine scripts were compiled/simulated, not type-checked against Studio's engine definitions |
-| Pure progression, promotion and transaction rules | PASS | 68 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
-| Production server event wiring | PASS | 65 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
-| Production client event wiring | PASS | 38 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
-| Disabled-product and unpublished-place mode | PASS | 16 assertions using an explicit zero-ID fixture and GetDataStore unavailable; full free run, earned cosmetics, restart and disabled checkout |
-| Supplied Robux product configuration | PASS | 16 assertions exercise the creator-supplied pass/product IDs, lobby safe surfaces, checkout routes, ownership grants and ten-credit receipt replay using service doubles; no live payments |
+| Pure progression, promotion and transaction rules | PASS | 74 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
+| Production server event wiring | PASS | 62 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
+| Production client event wiring | PASS | 42 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
+| Disabled-product and unpublished-place mode | PASS | 16 assertions using an explicit zero-ID fixture and GetDataStore unavailable; full free run, rejected removed cosmetics, restart and disabled checkout |
+| Supplied Robux product configuration | PASS | 30 assertions exercise the creator-supplied pass/product IDs, lobby safe surfaces, checkout routes, ownership grants and ten-stage delivery, refund and receipt replay using service doubles; no live payments |
 | Roblox XML and binary serialization | PASS | 6,708 assertions using Lune 0.11.0/rbx-dom; 6,292 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
 | Tool installation repeatability | PASS | Pinned upstream Luau/Lune release archives downloaded with TLS and verified against fixed SHA-256 checksums before extraction |
 
@@ -49,21 +49,21 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 | Fading tiles | UNVERIFIED | Timed solidity/warning cycle exercised; permanent free side route verified; real collision timing unverified |
 | Lava hazards | UNVERIFIED | Touch simulation reduces health to zero; actual contact requires engine observation |
 | Rotating hazards | UNVERIFIED | Simulated rotation changes; moving-hazard overlap scan is implemented; real contact and jump timing unverified |
-| Character skins | UNVERIFIED | Coin purchase, original palette restoration, companion creation and free re-equip pass server simulation; rendered avatar appearance unverified |
+| Coin shop removed | PASS | No coin HUD or leaderboard, no coin rewards or cosmetic purchases; old saved profiles remain readable |
 | Requested Brainrot Rap recording | UNVERIFIED | User supplied audio ID 134764779929866, configured and SoundId verified in client simulation; actual Roblox playback/permissions unverified |
 | Fictional speed leaderboard | PASS | Lobby NPC rivals board has fast invented times explicitly labelled FICTIONAL TIMES / NOT PLAYER RECORDS; not mixed with actual player stats |
 | Music | UNVERIFIED | Original percussion sequencer and optional owned-track playlist implemented; simulated OFF stops notes; actual bundled sound playback unverified |
 | Sound-effect controls | PASS | Simulated muted notifications do not call Sound.Play; actual sound output unverified |
 | Reduced UI motion | PASS | Setting activation tested; transitions/confetti consult the option; rendered result unverified |
-| HUD/progress/timer | UNVERIFIED | Server state reaches correct initial HUD; progress/coins/wins are simulated; visual clipping and timer appearance unverified |
+| HUD/progress/timer | UNVERIFIED | Server state reaches correct initial HUD; progress/wins are simulated; visual clipping and timer appearance unverified |
 | Shop interface | UNVERIFIED | Shop opens, rows and Buy callbacks work in simulation; real rendered interface requires external observation |
 | Interactive lobby shops | UNVERIFIED | Two ProximityPrompts and client callbacks exist; actual distance/keyboard/touch prompts unverified |
 | Restart confirmation | UNVERIFIED | Confirmation and server reset implemented; server reset tested; full rendered interaction unverified |
 | Leaderboard | UNVERIFIED | Default Roblox player-list leaderstats created and updated; real CoreGui display not observed |
-| Persistent coins/wins/best/skins/preferences | UNVERIFIED | Transform and service-double tests pass; real DataStore access and reconnect persistence untested |
+| Persistent wins/best/passes/skips/preferences | UNVERIFIED | Transform and service-double tests pass; real DataStore access and reconnect persistence untested |
 | Save outage fallback | PASS | Storage failure yields explicitly session-only state; simulated paid prompts disabled; production outages untested |
-| Speed and gravity coils | UNVERIFIED | Server verifies ownership and applies speed 23 / jump power 62, with baseline restoration; physical benefits/visuals unverified |
-| Stage skip credits | UNVERIFIED | Product 3720254856 configured for ten credits; atomic grant/replay/spend tests pass; live receipt delivery unverified |
+| Speed and gravity coils | UNVERIFIED | Server verifies ownership and applies speed 32 / jump power 80 simultaneously, with baseline restoration; physical benefits/visuals unverified |
+| Stage skip credits | UNVERIFIED | Product 3720254856 configured for ten credits; atomic grant/replay/ten-stage delivery/full refund tests pass; live receipt delivery unverified |
 | Game Pass purchases | UNVERIFIED | Speed Coil 2038121195 and Jump Boot 2041634630 configured as creator-confirmed Game Passes; actual ownership and live checkout unverified |
 | Developer Product receipt processing | PASS | Duplicate receipts do not duplicate credits, unknown/offline/outage receipts retry, credit is persisted before acknowledgement in service doubles; real MarketplaceService delivery untested |
 | RemoteEvent validation | PASS | Bounds/type checks, ownership gates, sequential stage checks and rate flood tested; comprehensive movement anti-cheat is outside this implementation |
