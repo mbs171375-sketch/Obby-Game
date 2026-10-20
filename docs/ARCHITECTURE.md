@@ -52,6 +52,6 @@ The scene contains 6,292 BaseParts, including the spawn. Decorative objects do n
 
 ## Robux-only shop update
 
-Coin rewards, coin UI and coin cosmetic purchase actions are removed. Legacy profile fields remain readable. Pass ownership unlocks independent Speed/Gravity controls without equipping on join. The server gates the actual movement benefits on ownership and equipment: Humanoid WalkSpeed 32 and JumpPower 100. Confirmed purchases auto-equip their boost; selected effects survive respawn. Owned-pass controls independently toggle the effects.
+Coin rewards, coin UI and coin cosmetic purchase actions are removed. Legacy profile fields remain readable. Pass ownership unlocks independent Speed/Gravity controls without equipping on join. The server gates the actual movement benefits on ownership and equipment: Humanoid WalkSpeed 32 and JumpPower 100. Confirmed purchases auto-equip their boost; selected effects survive respawn. All shop Buy controls request official Roblox prompts. Existing owners are labelled and Buy re-equips after checking ownership; owned passes cannot be charged twice.
 
 A skip purchase durably grants ten stage credits. A new receipt attempts a single ten-stage delivery from a safe active run; otherwise credits await manual use. Reservations store both token and quantity, so interruption refunds the entire amount. Delivery caps at stage 101 and preserves the unused balance. Replayed receipts do not auto-deliver again. Old pending reservations without a quantity recover one credit.

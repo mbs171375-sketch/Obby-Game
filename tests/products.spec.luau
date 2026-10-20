@@ -62,6 +62,10 @@ expect(owned.Character.Humanoid.WalkSpeed==16 and owned.Character.Humanoid.JumpP
 expect(owned.Character:FindFirstChild("EquippedCoil")==nil,"no paid coil appears on spawn")
 ctx.action:Fire(owned,"EquipCoil","Speed");ctx.step(1);ctx.action:Fire(owned,"EquipCoil","Gravity")
 expect(owned.Character.Humanoid.WalkSpeed==32 and owned.Character.Humanoid.JumpPower==100,"verified owner can deliberately enable both paid boosts")
+ctx.step(2);local promptCount=#ctx.market.prompts
+ctx.action:Fire(owned,"Buy","Speed")
+expect(#ctx.market.prompts==promptCount+1 and ctx.market.prompts[#ctx.market.prompts].id==2038121195,"owned Buy requests supplied ID through Roblox payment API")
+expect(owned.Character.Humanoid.WalkSpeed==32,"owned Buy equips rather than toggles off")
 -- Interrupt the actual production reservation between durable write and delivery.
 ctx.touch(owned,1);ctx.setFloor(nil)
 local interruption={PlayerId=124,ProductId=3720254856,PurchaseId="interrupted-use"}

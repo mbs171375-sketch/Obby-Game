@@ -549,8 +549,15 @@ Action.OnServerEvent:Connect(function(player, action, argument)
 			if not product or not info or not info.Enabled then notice(player,"This optional item is not on sale."); return end
 			if not s.persistent or not s.saveHealthy then notice(player,"Purchases disabled until save service is available."); return end
 			if product.Kind == "Pass" then
-				if s.owned[argument] then notice(player,"You already own this coil. Equip it in the shop."); return end
 				MarketplaceService:PromptGamePassPurchase(player,product.Id)
+				-- Always request Roblox's official prompt. Existing passes cannot be rebought.
+				if s.owned[argument] then
+					loadOwnership(player)
+					if s.owned[argument] then
+						s.equipped[argument] = true; applyCoil(player); view(player)
+						notice(player,"Pass already owned: equipped without another charge.")
+					end
+				end
 			elseif argument == "Skip" then
 				MarketplaceService:PromptProductPurchase(player,product.Id)
 			end

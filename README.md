@@ -46,7 +46,7 @@ The creator supplied and confirmed these connected items. See [Robux setup and p
 
 Each confirmed skip purchase moves forward **up to 10 stages at once** from a safe island. If airborne or outside an active run, the purchase is saved: use **SKIP +10** in the shop once safely standing in the course. Near the finish, unused stages remain saved. Duplicate receipts never repeat the teleport or grant. Death still resets run progress.
 
-Everyone joins with normal movement and no paid items equipped. Only verified pass owners can enable the boosts in the shop: Speed Coil increases WalkSpeed from **16 to 32**, and Jump Boot increases JumpPower from **50 to 100**. Both work together and can be toggled independently using **OWNED • ON/OFF**. Players without a pass see its live Robux price.
+Everyone joins with normal movement and no paid items equipped. Only verified pass owners can enable the boosts in the shop: Speed Coil increases WalkSpeed from **16 to 32**, and Jump Boot increases JumpPower from **50 to 100**. Both work together. Each shop item has a **BUY • R$** button that requests the official Roblox purchase prompt. Owned passes are labelled in the description and Buy equips them without a second charge; Roblox does not allow repeat Game Pass purchases.
 
 Prices come from Roblox, including regional client pricing; no Robux amount is hard-coded. Both passes must be on sale and the products must belong to the experience you publish over. Purchases require available DataStore persistence. Lobby and numbered safe islands can display optional offers after the 50-second cadence and two stationary seconds. Settings can turn reminders off.
 

@@ -263642,8 +263642,15 @@ Action.OnServerEvent:Connect(function(player, action, argument)
 			if not product or not info or not info.Enabled then notice(player,"This optional item is not on sale."); return end
 			if not s.persistent or not s.saveHealthy then notice(player,"Purchases disabled until save service is available."); return end
 			if product.Kind == "Pass" then
-				if s.owned[argument] then notice(player,"You already own this coil. Equip it in the shop."); return end
 				MarketplaceService:PromptGamePassPurchase(player,product.Id)
+				-- Always request Roblox's official prompt. Existing passes cannot be rebought.
+				if s.owned[argument] then
+					loadOwnership(player)
+					if s.owned[argument] then
+						s.equipped[argument] = true; applyCoil(player); view(player)
+						notice(player,"Pass already owned: equipped without another charge.")
+					end
+				end
 			elseif argument == "Skip" then
 				MarketplaceService:PromptProductPurchase(player,product.Id)
 			end
@@ -263966,15 +263973,14 @@ updateShop=function()
 		local product=Config.Products[id]
 		local info=priceInfo(id)
 		local owned=snapshot.Owned[id]
-		local r=row(product.Name,product.Benefit,Color3.fromRGB(table.unpack(product.Color)),116)
+		local detail=if owned then "Already owned. Roblox will not charge again; Buy equips your pass." else product.Benefit
+		local r=row(product.Name,detail,Color3.fromRGB(table.unpack(product.Color)),116)
 		local available=info and info.Enabled and snapshot.Saving
-		local label=if owned then (if snapshot.Equipped[id] then "OWNED • ON" else "OWNED • OFF")
-			elseif available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
+		local label=if available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
 		local buy=button(r,label,UDim2.fromOffset(12,74),UDim2.new(.65,-18,0,31),palette.Ink,function()
-			if owned then Action:FireServer("EquipCoil",id)
-			elseif available then Action:FireServer("Buy",id) end
+			if available then Action:FireServer("Buy",id) end
 		end)
-		if not available and not owned then buy.TextColor3=palette.Muted end
+		if not available then buy.TextColor3=palette.Muted end
 		if id=="Skip" then
 			button(r,if snapshot.SkipCredits&gt;0 then "SKIP +"..tostring(math.min(10,snapshot.SkipCredits,math.max(0,101-snapshot.Stage))) else "NO SKIPS",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
 				if snapshot.SkipCredits&gt;0 then Action:FireServer("UseSkip");closeModal() end

@@ -15,9 +15,9 @@ Run `python3 tools/verify.py --tools /workspace/obby-tools` in this cloud enviro
 | Shared-module strict type checks | PASS | `luau-analyze` passes Rules and Config; engine scripts were compiled/simulated, not type-checked against Studio's engine definitions |
 | Pure progression, promotion and transaction rules | PASS | 74 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
 | Production server event wiring | PASS | 62 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
-| Production client event wiring | PASS | 42 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
+| Production client event wiring | PASS | 43 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
 | Disabled-product and unpublished-place mode | PASS | 16 assertions using an explicit zero-ID fixture and GetDataStore unavailable; full free run, rejected removed cosmetics, restart and disabled checkout |
-| Supplied Robux product configuration | PASS | 37 assertions exercise the creator-supplied pass/product IDs, lobby safe surfaces, checkout routes, ownership grants and ten-stage delivery, refund and receipt replay using service doubles; no live payments |
+| Supplied Robux product configuration | PASS | 39 assertions exercise the creator-supplied pass/product IDs, lobby safe surfaces, checkout routes, ownership grants and ten-stage delivery, refund and receipt replay using service doubles; no live payments |
 | Roblox XML and binary serialization | PASS | 6,708 assertions using Lune 0.11.0/rbx-dom; 6,292 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
 | Tool installation repeatability | PASS | Pinned upstream Luau/Lune release archives downloaded with TLS and verified against fixed SHA-256 checksums before extraction |
 

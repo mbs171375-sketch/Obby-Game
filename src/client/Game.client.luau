@@ -218,15 +218,14 @@ updateShop=function()
 		local product=Config.Products[id]
 		local info=priceInfo(id)
 		local owned=snapshot.Owned[id]
-		local r=row(product.Name,product.Benefit,Color3.fromRGB(table.unpack(product.Color)),116)
+		local detail=if owned then "Already owned. Roblox will not charge again; Buy equips your pass." else product.Benefit
+		local r=row(product.Name,detail,Color3.fromRGB(table.unpack(product.Color)),116)
 		local available=info and info.Enabled and snapshot.Saving
-		local label=if owned then (if snapshot.Equipped[id] then "OWNED • ON" else "OWNED • OFF")
-			elseif available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
+		local label=if available then "BUY • R$ "..tostring(info.Price) else "NOT ON SALE"
 		local buy=button(r,label,UDim2.fromOffset(12,74),UDim2.new(.65,-18,0,31),palette.Ink,function()
-			if owned then Action:FireServer("EquipCoil",id)
-			elseif available then Action:FireServer("Buy",id) end
+			if available then Action:FireServer("Buy",id) end
 		end)
-		if not available and not owned then buy.TextColor3=palette.Muted end
+		if not available then buy.TextColor3=palette.Muted end
 		if id=="Skip" then
 			button(r,if snapshot.SkipCredits>0 then "SKIP +"..tostring(math.min(10,snapshot.SkipCredits,math.max(0,101-snapshot.Stage))) else "NO SKIPS",UDim2.new(.65,0,0,74),UDim2.new(.35,-12,0,31),palette.Ink,function()
 				if snapshot.SkipCredits>0 then Action:FireServer("UseSkip");closeModal() end

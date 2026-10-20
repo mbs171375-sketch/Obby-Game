@@ -96,11 +96,14 @@ buy.Activated:Fire()
 expect(#ctx.market.prompts==prompts+1,"deliberate buy activation prompts purchase")
 ctx.market.owns['10:101']=true
 ctx.market.PromptGamePassPurchaseFinished:Fire(p,101,true)
-expect(findText("OWNED • ON","TextButton")~=nil,"owned pass is clearly labelled and enabled")
-ctx.step(2);click("OWNED • ON")
-expect(p.Character.Humanoid.WalkSpeed==16 and findText("OWNED • OFF","TextButton")~=nil,"owned-pass control disables the actual ability")
-ctx.step(2);click("OWNED • OFF")
-expect(p.Character.Humanoid.WalkSpeed==32,"owned-pass control reenables actual speed")
+expect(findText("OWNED • ON","TextButton")==nil and findText("OWNED • OFF","TextButton")==nil,"shop has no owned ON/OFF controls")
+local ownedRow=findText("Speed Coil","TextLabel").Parent
+local ownedBuy
+for _,child in ownedRow:GetChildren() do if child.ClassName=="TextButton" and child.Text=="BUY • R$ 20" then ownedBuy=child end end
+expect(ownedBuy~=nil,"owned pass retains a Buy button")
+ctx.step(2);local beforeOwned=#ctx.market.prompts;ownedBuy.Activated:Fire()
+expect(#ctx.market.prompts==beforeOwned+1 and ctx.market.prompts[#ctx.market.prompts].id==101,"owned Buy still requests official Roblox pass prompt")
+expect(p.Character.Humanoid.WalkSpeed==32,"verified existing owner equips without toggling the boost off")
 -- Restore unowned fixture state for promotion tests below.
 ctx.market.owns['10:101']=false
 ctx.market.PromptGamePassPurchaseFinished:Fire(p,101,true)
