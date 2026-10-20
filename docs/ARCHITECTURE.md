@@ -23,11 +23,11 @@ The delivered places are standalone. There is no Rojo, runtime HTTP request, thi
 
 ## Course design
 
-The route uses continuous sine curves in X, increasing Z, and an independent two-frequency height curve. Z increases monotonically, keeping far-apart stages from overlapping. Every world contains ten named obstacle beats. Neon islands mark progress and safe positions, but never change the player's respawn point. There is exactly one SpawnLocation in the lobby.
+The 6,889-stud route interpolates eleven world anchors with curved sideways and vertical offsets. Z increases monotonically, keeping far-apart stages from overlapping. Each world contains a different seeded shuffle of ten obstacle beats, chosen from fourteen categories. Neon islands mark progress and safe positions, but never change the player's respawn point. There is exactly one SpawnLocation in the lobby.
 
 The route checker constructs a graph of platform rectangles and computes edge-to-edge gaps. It conservatively uses WalkSpeed 16, JumpPower 50 and gravity 196.2, with a 0.6-stud launch/landing margin. It excludes moving clouds and fading tiles, so every stage must also have a static free route. This checks geometric feasibility, not input feel, humanoid collision, latency, camera visibility or Roblox's full physics engine.
 
-The fading route warns in amber before disappearing. Its side stones stay solid. The moving-cloud route also has permanent side stones. Lava and lasers are visibly pink; scenery does not have hidden collision. Springs and three-second speed boosts are free. Moving clouds carry riders by applying the platform's CFrame delta. Rotating anchored hazards additionally scan player-root overlap, since scripted CFrame changes alone cannot reliably produce touch events.
+The fading route warns in amber before disappearing. Its side stones stay solid. The moving-cloud route also has permanent side stones. Lava and lasers are visibly pink; scenery does not have hidden collision. Springs and three-second speed boosts are free. Moving clouds and lift stairs carry riders by applying the platform's CFrame delta. One ground raycast per player identifies their support, avoiding a player loop for every moving step. Hidden steps cannot carry players. Rotating anchored hazards additionally scan player-root overlap, since scripted CFrame changes alone cannot reliably produce touch events.
 
 ## Trust and data
 
@@ -47,4 +47,4 @@ The state machine checks a 50-second cadence and queues at most one offer. A car
 
 The music default is an original 132 BPM tung-style percussion sequence using bundled footstep/jump samples and a pitched ping bass accent. Actual bundled audio availability and its sound quality need engine testing. Owned uploaded audio IDs can replace it in Config. Cosmetics provide body colour accents, a companion and trail; they do not replace the player's avatar body or clothing. Reduced motion removes UI tweening and confetti and restores the 27 dancing brainrot models to their static poses; moving gameplay obstacles remain active.
 
-The scene contains 3,979 BaseParts, including the spawn. Decorative objects do not cast shadows. Streaming is disabled for predictable first-launch behaviour. Low-end mobile FPS, camera comfort and touch ergonomics remain unverified; this offline suite cannot establish them.
+The scene contains 6,292 BaseParts, including the spawn. Decorative objects do not cast shadows. Streaming is disabled for predictable first-launch behaviour. Low-end mobile FPS, camera comfort and touch ergonomics remain unverified; this offline suite cannot establish them.

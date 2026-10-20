@@ -6,6 +6,8 @@ A colourful, standalone Roblox obby: **100 stages, 10 original meme worlds, one 
 
 ![Offline geometry preview, not a Roblox screenshot](docs/course-preview.png)
 
+**Update 3:** [Switchback chaos](docs/UPDATE_3.md): 6,889-stud route, shuffled obstacles, disappearing moving stairs, lifts, crumbling steps, swinging balls, and a labelled NPC rivals board. The requested YouTube rap still requires a permitted Roblox audio ID.
+
 **Update 2:** [Tung’s Mouth update notes](docs/UPDATE_2.md): smaller corner HUD, dancing brainrot figures, rotating bats, original percussion, and a giant mouth finish.
 
 The automated offline checks pass. **Roblox gameplay, physical devices, actual audio and live purchases have not been verified.** Claude review and Studio playtesting were waived by the requester; that waiver is not a passing test. See [verification results](docs/VERIFICATION.md) and [captured test output](docs/test-output.txt).
@@ -13,8 +15,8 @@ The automated offline checks pass. **Roblox gameplay, physical devices, actual a
 ## What is included
 
 - Ten worlds with ten stages each, original geometric mascots, floating scenery, neon edging, signs, a colourful lobby and a victory island.
-- Stepping stones, zigzags, narrow beams, lava ribbons, rotating lasers, fading tiles, sideways conveyors, springs, free speed boosts, moving clouds and branching lanes.
-- A free default-jump route through every stage, including permanent side routes around timed tiles and moving clouds.
+- Fourteen obstacle categories: stepping stones, zigzags, narrow beams, lava, spinners, fading tiles, conveyors, springs, moving clouds, branching lanes, vanishing moving stairs, vertical lifts, pendulum balls and touch-triggered crumble stairs.
+- A free default-jump route through every stage, including permanent side routes around timed tiles, lifts, moving clouds and swinging balls.
 - Death resets the entire run to the original lobby. There are **no respawn checkpoints**. Coins, best progress, wins, cosmetics and unused skip credits are separate from run progress.
 - Earn two coins per completed intermediate stage and 100 bonus coins at the finish. Five character palettes with matching trails and original companions use earned coins.
 - Server-owned progression, default Roblox player-list leaderboard, run timer, restart confirmation and optional coil/skip shop.

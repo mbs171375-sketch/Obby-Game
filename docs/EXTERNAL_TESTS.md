@@ -3,7 +3,7 @@
 Claude review and Roblox Studio playtesting were waived by the requester. These instructions are provided for whoever later verifies the live engine; none of the steps below are claimed to have happened here.
 
 1. Open `dist/BrainrotOrbit.rbxl` in Studio and press F5. Confirm that the lobby and mascot scenery load and the Output window has no script errors.
-2. Walk towards stage 1, verify the camera faces the course, and complete the first ten obstacles. Check lava, lasers, warning colours, spring motion, the gold ZOOM pad, conveyor drift, the moving cloud and both free side paths.
+2. Walk towards stage 1, verify the camera faces the course, and complete the first ten obstacles. Check lava, lasers, warning colours, spring motion, the gold ZOOM pad, conveyor drift, the moving cloud and both free side paths. Also test vertical elevators carrying riders, vanishing stairs, crumbling steps restoring after touch, and both pendulum balls on each dodge bridge.
 3. Traverse all 100 stages, including the highest/lowest sections and curved approaches. Confirm each numbered island advances once, the finish grants exactly one win and 100 bonus coins only after entering Tung’s mouth, and the timer stops. Note any jump that feels unfair, blind or unreliable.
 4. Die after several stages and after a purchased skip. Confirm the next character appears at the original lobby with stage 1, while free coins, cosmetics and unused credits remain. Repeat with RESTART and RUN AGAIN.
 5. Open SHOP via HUD and both lobby kiosks. Earn coins, select each character cosmetic, and reselect owned cosmetics without another charge. Revert to Classic and confirm original colours are restored. Test a fresh avatar after appearance loading.

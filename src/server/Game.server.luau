@@ -318,22 +318,57 @@ for _, ob in World:GetDescendants() do
 				end
 			end)
 		end
+		if ob:FindFirstChild("Crumble") then
+			local crumbling=false
+			local baseColor=ob.Color
+			ob.Touched:Connect(function(hit)
+				if crumbling or not playerFromHit(hit) then return end
+				crumbling=true;ob.Color=Color3.fromRGB(255,190,76)
+				task.wait(.75)
+				ob.CanCollide=false;ob.Transparency=.9
+				task.wait(3.5)
+				ob.CanCollide=true;ob.Transparency=0;ob.Color=baseColor;crumbling=false
+			end)
+		end
 	end
 end
 assert(#pads == 101, "Orbit requires all 100 stage starts and the finish pad")
 
 -- One heartbeat handles all moving objects; ferry delta carries standing riders.
 local movers = {}
+local movingFloors = {}
 local nextHazardScan = 0
 for _, ob in World:GetDescendants() do
-	if ob:IsA("BasePart") and (ob:FindFirstChild("Spinner") or ob:FindFirstChild("MoveDistance")) then
-		table.insert(movers, { part = ob, base = ob.CFrame, previous = ob.CFrame })
+	if ob:IsA("BasePart") and (ob:FindFirstChild("Spinner") or ob:FindFirstChild("MoveDistance") or ob:FindFirstChild("Pendulum")) then
+		local cable
+		if ob:FindFirstChild("Pendulum") then
+			for _,child in ob.Parent:GetChildren() do
+				if child:FindFirstChild("PendulumCable") and child.PendulumIndex.Value==ob.PendulumIndex.Value then cable=child end
+			end
+		end
+		table.insert(movers, { part = ob, base = ob.CFrame, previous = ob.CFrame, cable=cable })
+		if ob:FindFirstChild("MoveDistance") then movingFloors[ob]=true end
 	end
 end
 RunService.Heartbeat:Connect(function()
 	local now = workspace:GetServerTimeNow()
 	local scanHazards = now >= nextHazardScan
 	if scanHazards then nextHazardScan = now + .08 end
+	-- One ground query per player avoids checking every rider against hundreds of stairs.
+	local riders={}
+	for player in sessions do
+		local char=player.Character
+		local root=char and char:FindFirstChild("HumanoidRootPart")
+		if root and root.AssemblyLinearVelocity.Y<8 then
+			local params=RaycastParams.new()
+			params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={char}
+			local hit=workspace:Raycast(root.Position,Vector3.new(0,-6,0),params)
+			if hit and movingFloors[hit.Instance] and hit.Instance.CanCollide then
+				riders[hit.Instance]=riders[hit.Instance] or {}
+				table.insert(riders[hit.Instance],{char=char,root=root})
+			end
+		end
+	end
 	for _, mover in movers do
 		local ob = mover.part
 		if ob:FindFirstChild("Spinner") then
@@ -352,16 +387,29 @@ RunService.Heartbeat:Connect(function()
 					end
 				end
 			end
+		elseif ob:FindFirstChild("Pendulum") then
+			local pivot=mover.base*CFrame.new(0,15,0)
+			ob.CFrame=pivot*CFrame.Angles(0,0,math.sin(now*1.4+ob.Pendulum.Value)*.65)*CFrame.new(0,-15,0)
+			if mover.cable then mover.cable.CFrame=CFrame.lookAt((pivot.Position+ob.Position)/2,pivot.Position) end
+			if scanHazards then
+				for player in sessions do
+					local char=player.Character
+					local root=char and char:FindFirstChild("HumanoidRootPart")
+					local hum=char and char:FindFirstChildOfClass("Humanoid")
+					if root and hum and (root.Position-ob.Position).Magnitude<ob.Size.X/2+1.1 then hum.Health=0 end
+				end
+			end
 		else
-			local cf = mover.base * CFrame.new(0, 0, math.sin(now * math.pi * 2 / ob.MovePeriod.Value) * ob.MoveDistance.Value)
+			local offset=math.sin(now*math.pi*2/ob.MovePeriod.Value)*ob.MoveDistance.Value
+			local axis=ob:FindFirstChild("MoveAxis")
+			local cf = mover.base * (if axis and axis.Value=="Y" then CFrame.new(0,offset,0) else CFrame.new(0,0,offset))
 			local delta = cf * mover.previous:Inverse()
-			for player in sessions do
-				local char = player.Character
-				local root = char and char:FindFirstChild("HumanoidRootPart")
-				if root then
+			for _,rider in riders[ob] or {} do
+				local char,root=rider.char,rider.root
+				if char.Parent then
 					local localPos = mover.previous:PointToObjectSpace(root.Position)
-					if math.abs(localPos.X) < ob.Size.X/2 + .5 and math.abs(localPos.Z) < ob.Size.Z/2 + .5
-						and localPos.Y > .5 and localPos.Y < 5 and root.AssemblyLinearVelocity.Y < 3 then
+					if ob.CanCollide and math.abs(localPos.X) < ob.Size.X/2 + .5 and math.abs(localPos.Z) < ob.Size.Z/2 + .5
+						and localPos.Y > .5 and localPos.Y < 5 and root.AssemblyLinearVelocity.Y < 8 then
 						char:PivotTo(delta * char:GetPivot())
 					end
 				end

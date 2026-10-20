@@ -95,12 +95,16 @@ expect(not state(p3).Saving,"offline save fallback explicitly reported")
 step(2);local prompts=#market.prompts;action:Fire(p3,"Buy","Skip")
 expect(#market.prompts==prompts,"paid purchases disabled in session-only mode")
 storage.fail=false
-local spring,conveyor,boost,ferry,spinner,fade,hazard
+local spring,conveyor,boost,ferry,spinner,fade,hazard,lift,stairs,crumble,pendulum,cable
 for _,ob in world:GetDescendants() do
 	if ob:FindFirstChild("Spring") then spring=ob end
 	if ob:FindFirstChild("Conveyor") then conveyor=ob end
 	if ob:FindFirstChild("SpeedBoost") then boost=ob end
-	if ob:FindFirstChild("MoveDistance") then ferry=ob end
+	if ob:FindFirstChild("MoveDistance") and not ob:FindFirstChild("MoveAxis") then ferry=ob end
+	if ob:FindFirstChild("MoveAxis") and not ob:FindFirstChild("Fade") then lift=ob end
+	if ob:FindFirstChild("MoveAxis") and ob:FindFirstChild("Fade") then stairs=ob end
+	if ob:FindFirstChild("Crumble") then crumble=ob end
+	if ob:FindFirstChild("Pendulum") then pendulum=ob end
 	if ob:FindFirstChild("Spinner") then spinner=ob end
 	if ob:FindFirstChild("Fade") then fade=ob end
 	if ob:FindFirstChild("Hazard") then hazard=ob end
@@ -114,6 +118,7 @@ step(3.1)
 expect(p2.Character.Humanoid.WalkSpeed==16,"free boost expires to baseline")
 p2.Character.HumanoidRootPart.AssemblyLinearVelocity=V.zero
 p2.Character.HumanoidRootPart.CFrame=ferry.CFrame+V.new(0,3,0)
+ctx.setFloor(ferry)
 local oldPosition=p2.Character.HumanoidRootPart.Position
 services.RunService.Heartbeat:Fire()
 expect((p2.Character.HumanoidRootPart.Position-oldPosition).Magnitude>.01,"moving cloud carries standing rider")
@@ -123,6 +128,36 @@ expect(spinner.CFrame~=spinnerBefore,"spinner changes orientation")
 local sawHidden,sawSolid=false,false
 for _=1,30 do step(.25);sawHidden=sawHidden or not fade.CanCollide;sawSolid=sawSolid or fade.CanCollide end
 expect(sawHidden and sawSolid,"fade tiles cycle through solid and hidden states")
+local liftBefore=lift.Position
+p2.Character.HumanoidRootPart.AssemblyLinearVelocity=V.zero
+p2.Character.HumanoidRootPart.CFrame=lift.CFrame+V.new(0,3,0)
+ctx.setFloor(lift)
+local riderBefore=p2.Character.HumanoidRootPart.Position
+step(.45);services.RunService.Heartbeat:Fire()
+expect(math.abs(lift.Position.Y-liftBefore.Y)>.001,"lifts move vertically")
+expect(math.abs(lift.Position.X-liftBefore.X)<.001 and math.abs(lift.Position.Z-liftBefore.Z)<.001,"lift does not drift off its route")
+expect(math.abs((p2.Character.HumanoidRootPart.Position.Y-riderBefore.Y)-(lift.Position.Y-liftBefore.Y))<.001,"lift carries rider by the vertical delta")
+stairs.CanCollide=false
+p2.Character.HumanoidRootPart.CFrame=stairs.CFrame+V.new(0,3,0)
+ctx.setFloor(stairs)
+local airPosition=p2.Character.HumanoidRootPart.Position
+step(.01);services.RunService.Heartbeat:Fire()
+expect((p2.Character.HumanoidRootPart.Position-airPosition).Magnitude<.001,"invisible stairs do not carry unsupported players")
+crumble.Touched:Fire(p2.Character.HumanoidRootPart)
+expect(crumble.CanCollide,"crumbling step gives a warning before vanishing")
+step(.8);expect(not crumble.CanCollide,"stepped-on crumble platform disappears")
+step(3.6);expect(crumble.CanCollide,"crumble platform restores for other players")
+local ballBefore=pendulum.CFrame
+step(.4);services.RunService.Heartbeat:Fire()
+expect(pendulum.CFrame~=ballBefore,"dodge ball swings in a pendulum arc")
+for _,child in pendulum.Parent:GetChildren() do
+	if child:FindFirstChild("PendulumCable") and child.PendulumIndex.Value==pendulum.PendulumIndex.Value then cable=child end
+end
+expect(math.abs((pendulum.Position-cable.Position).Magnitude-7.5)<.001,"cable follows the swinging ball")
+p2.Character.Humanoid.Health=100
+p2.Character.HumanoidRootPart.CFrame=pendulum.CFrame
+step(.1);services.RunService.Heartbeat:Fire()
+expect(p2.Character.Humanoid.Health==0,"swinging ball overlap detects a hit without relying on CFrame touch events")
 hazard.Touched:Fire(p2.Character.HumanoidRootPart)
 expect(p2.Character.Humanoid.Health==0,"hazard touch kills humanoid")
 playerService.PlayerRemoving:Fire(p2)

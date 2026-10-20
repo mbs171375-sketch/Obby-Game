@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import random
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -20,7 +21,20 @@ THEMES = [
     ("Disco Dumpling", "ONE SMALL HOP. ONE BIG VIBE.", (211, 135, 255), (255, 233, 145), "dumpling"),
     ("Cosmic Crown", "THE FINAL BRAIN CELL", (255, 213, 76), (130, 244, 255), "crown"),
 ]
-KINDS = ["stones", "zigzag", "beam", "lava", "spinner", "fade", "conveyor", "spring", "ferry", "choice"]
+CLASSIC_KINDS = ["stones", "zigzag", "beam", "lava", "spinner", "fade", "conveyor", "spring", "ferry", "choice"]
+NEW_KINDS = ['stairs','lift','pendulum','crumble']
+KINDS = CLASSIC_KINDS + NEW_KINDS
+STEPS = (.14,.23,.32,.41,.5,.59,.68,.77,.86)
+WAYPOINTS = [(0,95,0),(300,190,450),(-100,130,950),(-450,250,1400),(0,170,1850),
+             (430,300,2300),(100,210,2850),(-420,350,3300),(-100,250,3800),(430,390,4300),(0,280,4900)]
+
+def kind_for(i):
+    zone=i//10
+    choices=[CLASSIC_KINDS[(zone*3+j)%10] for j in range(6)]+NEW_KINDS
+    random.Random(851+zone).shuffle(choices)
+    if zone==0:
+        choices.remove('stones');choices.insert(0,'stones')
+    return choices[i%10]
 HINTS = {
     "stones": "Find your rhythm. Small jumps, big brain.",
     "zigzag": "Look where you want to land.",
@@ -32,12 +46,21 @@ HINTS = {
     "spring": "The cyan spring gives a gentle extra hop.",
     "ferry": "Ride the cloud, or take the side stones.",
     "choice": "Two lanes. Both work. Pick your vibe.",
+    'stairs': 'Amber stairs vanish soon. Side steps stay solid.',
+    'lift': 'Ride the rising platforms, or follow the static side stairs.',
+    'pendulum': 'Watch the swinging balls. Cross after the swing.',
+    'crumble': 'Touched tiles crumble after a warning. Keep moving!',
 }
 
 def route(i):
-    return (math.sin(i * .15) * 210 + math.sin(i * .38) * 28,
-            95 + 40 * math.sin(i * .13) + 22 * math.sin(i * .055) + i * .6,
-            i * 29)
+    if i>=100:return WAYPOINTS[-1]
+    zone=int(i//10);t=(i-zone*10)/10
+    a,b=WAYPOINTS[zone],WAYPOINTS[zone+1]
+    dx,dz=b[0]-a[0],b[2]-a[2];length=math.hypot(dx,dz)
+    side=52*math.sin(t*math.pi*2)*(1 if zone%2 else -1)
+    return (a[0]+dx*t+dz/length*side,
+            a[1]+(b[1]-a[1])*t+10*math.sin(t*math.pi*2),
+            a[2]+dz*t-dx/length*side)
 
 def lerp(a, b, t): return tuple(x + (y-x)*t for x, y in zip(a, b))
 def plus(a, b): return tuple(x+y for x,y in zip(a,b))
@@ -216,6 +239,9 @@ class Place:
         guide=self.part(lobby,'Rules sign',plus(first,(-23,5,-22)),(16,7,1),(49,39,88),solid=False)
         self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=5)
         self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=2)
+        rivals=self.part(lobby,'NPC Rivals Board',plus(first,(0,17,-18)),(29,14,1),(35,25,65),solid=False)
+        rival_text='NPC RIVALS\nFICTIONAL TIMES • NOT PLAYER RECORDS\n1. TungTurbo        00:24.08\n2. CappuccinoJet    00:31.42\n3. SharkOnSkates    00:38.16\n4. CrocoExpress     00:46.90\nCan your last brain cell keep up?'
+        self.text(rivals,rival_text,face=5);self.text(rivals,rival_text,face=2)
         self.mascot(lobby,'frog',plus(first,(25,5,-26)),(123,255,142),1.4)
         self.brainrot(lobby,'tung',plus(first,(-24,7,-7)),1.1)
         self.brainrot(lobby,'coffee',plus(first,(24,7,-8)),1,2)
@@ -300,7 +326,7 @@ class Place:
         def point(t,side=0,up=0):return plus(lerp(a,b,t),(right[0]*side,up,right[2]*side))
         model=self.item(parent,'Model',f'Stage{num:03d}')
         self.val(model,'Stage',num);self.val(model,'Theme',name)
-        kind=KINDS[i%10]
+        kind=kind_for(i)
         self.val(model,'Kind',kind)
         pad=self.part(model,'SafePad',a,(13,1,10),primary,yaw,material='Neon')
         self.val(pad,'Stage',num);self.val(pad,'Safe',True)
@@ -319,7 +345,7 @@ class Place:
                 self.part(model,'Candy edge',stripe,(.18,.25,depth),primary,yaw,material='Neon',solid=False)
             return ob
         if kind in ('stones','zigzag','conveyor','spring','fade'):
-            for j,t in enumerate((.23,.37,.51,.65,.79)):
+            for j,t in enumerate(STEPS):
                 side=((-1)**j)*2 if kind=='zigzag' else 0
                 ob=tile(t,side,width=7 if zone<5 else 6,up=math.sin(t*math.pi)*1 if kind=='spring' else 0)
                 if kind=='conveyor':
@@ -337,11 +363,11 @@ class Place:
                     self.prop(ob,'Color3','Color',(.45,1,.78))
             if kind=='fade':
                 # Stable bypass keeps every course beat completable without precise network timing.
-                for t in (.23,.37,.51,.65,.79):tile(t,side=8,width=4,label='Stable side route',c=primary)
+                for t in STEPS:tile(t,side=8,width=4,label='Stable side route',c=primary)
         elif kind=='beam':
-            for t in (.23,.37,.51,.65,.79):tile(t,width=3.5 if zone>3 else 4.5,depth=5.4,label='Balance beam')
+            for t in STEPS:tile(t,width=3.5 if zone>3 else 4.5,depth=5.4,label='Balance beam')
         elif kind in ('lava','spinner'):
-            for t in (.23,.37,.51,.65,.79):tile(t,width=10,depth=5.5,label='Runway')
+            for t in STEPS:tile(t,width=10,depth=5.5,label='Runway')
             if kind=='lava':
                 for t in (.35,.63):
                     ob=self.part(model,'Lava ribbon',point(t,0,.7),(10,.6,.65),(255,62,126),yaw,material='Neon')
@@ -353,14 +379,38 @@ class Place:
         elif kind=='ferry':
             ferry=tile(.51,width=9,depth=8,label='Moving cloud',c=(190,240,255))
             self.val(ferry,'MoveDistance',3.0);self.val(ferry,'MovePeriod',4.0)
-            for t in (.23,.37,.51,.65,.79):tile(t,side=8,width=4.5,label='Free side stones',c=primary)
-            tile(.23,width=8);tile(.79,width=8)
+            for t in STEPS:tile(t,side=8,width=4.5,label='Free side stones',c=primary)
+            tile(.14,width=8);tile(.86,width=8)
         elif kind=='choice':
             for side in (-4,4):
-                for t in (.23,.37,.51,.65,.79):tile(t,side,width=5,label='Left lane' if side<0 else 'Right lane',c=primary if side<0 else secondary)
+                for t in STEPS:tile(t,side,width=5,label='Left lane' if side<0 else 'Right lane',c=primary if side<0 else secondary)
             bat=self.part(model,'Sahur bat sweep',point(.51,-4,1.1),(6,.7,.8),(255,62,126),yaw,material='Neon',solid=False)
             self.prop(bat,'bool','CanTouch',True)
             self.val(bat,'Spinner',float(.85+zone*.03));self.val(bat,'Hazard',True)
+        elif kind in ('stairs','lift','crumble'):
+            for j,t in enumerate(STEPS):
+                # Shallow rise/fall adds a stair crest without requiring a paid jump boost.
+                ob=tile(t,width=7,up=3*math.sin(t*math.pi),label='Vanishing stair' if kind=='stairs' else 'Elevator step' if kind=='lift' else 'Crumbling step',c=(101,244,216))
+                if kind=='crumble':self.val(ob,'Crumble',True)
+                else:
+                    self.val(ob,'MoveDistance',1.5 if kind=='stairs' else 2.5)
+                    self.val(ob,'MovePeriod',5.0)
+                    self.val(ob,'MoveAxis','Y')
+                    if kind=='stairs':self.val(ob,'Fade',float(j*.36))
+            for t in STEPS:tile(t,side=9,width=4.5,label='Static side stairs',c=primary)
+        elif kind=='pendulum':
+            for t in STEPS:tile(t,width=12,depth=6,label='Dodge bridge')
+            for k,t in enumerate((.32,.68)):
+                ball=self.part(model,'Swinging dodge ball',point(t,0,5),(4.5,4.5,4.5),(255,72,137),yaw,material='Neon',solid=False,shape='Ball')
+                self.prop(ball,'bool','CanTouch',True)
+                self.val(ball,'Pendulum',float(k*math.pi/2+i*.2));self.val(ball,'Hazard',True)
+                self.val(ball,'PendulumIndex',k)
+                rope=self.part(model,'Pendulum cable',point(t,0,12.5),(.18,.18,15),(223,232,255),yaw,solid=False)
+                self.val(rope,'PendulumCable',True)
+                self.val(rope,'PendulumIndex',k)
+                self.part(model,'Pendulum support',point(t,0,20),(17,1,1),secondary,yaw,solid=False)
+            # A narrow, clearly marked bypass remains outside the ball's sweep.
+            for t in STEPS:tile(t,side=9 if t<.25 or t>.75 else 14,width=4.5,label='Static side stairs',c=primary)
         if i%10==0:
             self.manifest['themes'].append({'name':name,'motto':motto,'first_stage':num})
             # Theme arch is decorative and leaves the jumping corridor clear.

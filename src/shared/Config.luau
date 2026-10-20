@@ -26,4 +26,6 @@ return {
 	-- Original local procedural soundtrack is enabled by default. Optional owned audio IDs:
 	MusicTracks = {},
 	MusicBPM = 132,
+	-- Reference only: a permitted Roblox audio asset ID is still needed in MusicTracks.
+	RequestedMusicReference = "https://www.youtube.com/watch?v=T_NKi5KHUdI",
 }

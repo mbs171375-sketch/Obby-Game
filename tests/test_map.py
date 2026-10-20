@@ -48,7 +48,8 @@ class MapTests(unittest.TestCase):
         self.assertEqual([s['number'] for s in self.stages],list(range(1,101)))
         self.assertEqual(len(self.place.manifest['themes']),10)
         self.assertEqual(len({s['theme'] for s in self.stages}),10)
-        for kind in builder.KINDS:self.assertEqual(sum(s['kind']==kind for s in self.stages),10)
+        for kind in builder.KINDS:self.assertGreaterEqual(sum(s['kind']==kind for s in self.stages),6)
+        for zone in range(10):self.assertEqual(len({s['kind'] for s in self.stages[zone*10:zone*10+10]}),10)
 
     def test_course_climbs_drops_and_curves(self):
         heights=[s['start'][1] for s in self.stages]
@@ -69,6 +70,7 @@ class MapTests(unittest.TestCase):
                 for tile in stage['tiles']:
                     if tile['name']=='Moving cloud':continue
                     if stage['kind']=='fade' and tile['name']!='Stable side route':continue
+                    if stage['kind'] in ('stairs','lift','crumble','pendulum') and tile['name']!='Static side stairs':continue
                     tiles.append({**tile,'yaw':stage['yaw']})
                 nodes=[start]+tiles+[end];seen={0};queue=[0]
                 while queue:
@@ -99,9 +101,9 @@ class MapTests(unittest.TestCase):
                 hazards+=1
                 self.assertEqual(item.find('Properties/float[@name="Transparency"]').text,'0')
                 self.assertEqual(item.find('Properties/bool[@name="CanTouch"]').text,'true')
-            if name in ('Stable side route','Free side stones'):
+            if name in ('Stable side route','Free side stones','Static side stairs'):
                 self.assertEqual(item.find('Properties/bool[@name="CanCollide"]').text,'true')
-        self.assertEqual(hazards,30)
+        self.assertEqual(hazards,18)
 
     def test_deterministic_rebuild(self):
         other=builder.Place();other.build()
@@ -118,11 +120,19 @@ class MapTests(unittest.TestCase):
         for name in ('Tung Tung Tung Sahur','Ballerina Cappuccina','Tralalero Tralala','Bombardiro Crocodilo'):
             self.assertIn(name,names)
         self.assertEqual(names.count('Dance'),27)
-        self.assertEqual(names.count('Sahur bat sweep'),10)
+        self.assertEqual(names.count('Sahur bat sweep'),6)
         self.assertIn('TungMouth',names)
         finish=self.place.manifest['finish']
         self.assertGreater(finish['trigger'][2],finish['arrival'][2]+20)
         self.assertGreater(finish['mouth_width'],16)
         self.assertGreater(finish['mouth_clearance'],8)
+
+    def test_longer_course_unpredictable_order_and_labelled_rivals(self):
+        self.assertGreater(sum(s['length'] for s in self.stages),6000)
+        orders=[tuple(s['kind'] for s in self.stages[i:i+10]) for i in range(0,100,10)]
+        self.assertEqual(len(set(orders)),10)
+        texts=[t.text or '' for t in self.root.iter('string') if t.attrib.get('name')=='Text']
+        self.assertTrue(any('FICTIONAL TIMES' in t and 'NOT PLAYER RECORDS' in t for t in texts))
+        self.assertEqual(sum(s['kind']=='pendulum' for s in self.stages),10)
 
 if __name__=='__main__':unittest.main(verbosity=2)
