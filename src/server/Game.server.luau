@@ -222,9 +222,9 @@ local function applyCoil(player)
 	local root = char and char:FindFirstChild("HumanoidRootPart")
 	if not s or not hum or not root then return end
 	hum.UseJumpPower = true
-	local speed = if s.equipped.Speed then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
+	local speed = if s.owned.Speed and s.equipped.Speed then Config.SpeedCoilSpeed else Config.BaseWalkSpeed
 	hum.WalkSpeed = if (s.boostUntil or 0) > os.clock() then math.max(speed,22) else speed
-	hum.JumpPower = if s.equipped.Gravity then Config.GravityCoilJump else Config.BaseJumpPower
+	hum.JumpPower = if s.owned.Gravity and s.equipped.Gravity then Config.GravityCoilJump else Config.BaseJumpPower
 	local previous = char:FindFirstChild("EquippedCoil")
 	if previous then previous:Destroy() end
 	if not s.equipped.Speed and not s.equipped.Gravity then return end
@@ -419,10 +419,9 @@ local function loadOwnership(player)
 		if product.Kind == "Pass" and product.Id > 0 then
 			local ok, owns = pcall(MarketplaceService.UserOwnsGamePassAsync, MarketplaceService, player.UserId, product.Id)
 			if ok and sessions[player] == s then
-				local firstOwned = owns and not s.owned[name]
-				s.owned[name] = owns
-				if firstOwned then s.equipped[name] = true end
-				if not owns then s.equipped[name] = false end
+				-- Ownership unlocks the shop control; joining never auto-equips a pass.
+				s.owned[name] = owns == true
+				if owns ~= true then s.equipped[name] = false end
 			end
 		end
 	end

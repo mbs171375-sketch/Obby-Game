@@ -7,7 +7,7 @@ return {
 	BaseWalkSpeed = 16,
 	BaseJumpPower = 50,
 	SpeedCoilSpeed = 32,
-	GravityCoilJump = 80,
+	GravityCoilJump = 100,
 	DataStoreName = "BrainrotOrbit_v1",
 	Products = {
 		Speed = { Id = 2038121195, Kind = "Pass", Name = "Speed Coil", Benefit = "Double your running speed; works with Jump Boot", Color = {255, 208, 68} },

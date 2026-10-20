@@ -72,7 +72,7 @@ expect(state(p).Owned.Speed and p.Character.Humanoid.WalkSpeed==32,"pass re-quer
 step(5);action:Fire(p,"EquipCoil","None")
 expect(p.Character.Humanoid.WalkSpeed==16,"unequip restores baseline")
 market.owns['7:202']=true;market.PromptGamePassPurchaseFinished:Fire(p,202,true)
-expect(state(p).Owned.Gravity and p.Character.Humanoid.JumpPower==80,"gravity pass equips higher jump")
+expect(state(p).Owned.Gravity and p.Character.Humanoid.JumpPower==100,"gravity pass equips higher jump")
 step(2);action:Fire(p,"EquipCoil","None")
 expect(p.Character.Humanoid.JumpPower==50,"unequip restores jump strength")
 
