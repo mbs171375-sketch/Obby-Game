@@ -112,4 +112,17 @@ class MapTests(unittest.TestCase):
         self.assertEqual(len(original),90653)
         self.assertTrue(original.startswith(b'<roblox!'))
 
+    def test_brainrot_characters_and_mouth_finish(self):
+        items=list(self.root.iter('Item'))
+        names=[i.find('Properties/string[@name="Name"]').text for i in items]
+        for name in ('Tung Tung Tung Sahur','Ballerina Cappuccina','Tralalero Tralala','Bombardiro Crocodilo'):
+            self.assertIn(name,names)
+        self.assertEqual(names.count('Dance'),27)
+        self.assertEqual(names.count('Sahur bat sweep'),10)
+        self.assertIn('TungMouth',names)
+        finish=self.place.manifest['finish']
+        self.assertGreater(finish['trigger'][2],finish['arrival'][2]+20)
+        self.assertGreater(finish['mouth_width'],16)
+        self.assertGreater(finish['mouth_clearance'],8)
+
 if __name__=='__main__':unittest.main(verbosity=2)

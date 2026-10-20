@@ -23,7 +23,10 @@ step(1);p.Character.Humanoid.Died:Fire()
 expect(state(p).Stage==1 and state(p).Coins==2,"death resets run, keeps coins")
 expect(#market.prompts==0,"no automatic purchase prompt")
 touch(p,1)
-for i=2,101 do step(1);touch(p,i) end
+for i=2,100 do step(1);touch(p,i) end
+world.VictoryIsland.ArrivalPad.Touched:Fire(p.Character.HumanoidRootPart)
+expect(not state(p).Finished and state(p).Stage==100,"arrival outside Tung's mouth does not award victory")
+step(1);touch(p,101)
 expect(state(p).Finished and state(p).Completed==100,"all 100 stages complete")
 expect(state(p).Wins==1 and state(p).Coins==300,"one win and exact free-run rewards")
 touch(p,101)

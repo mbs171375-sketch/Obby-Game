@@ -25,4 +25,5 @@ return {
 	},
 	-- Original local procedural soundtrack is enabled by default. Optional owned audio IDs:
 	MusicTracks = {},
+	MusicBPM = 132,
 }

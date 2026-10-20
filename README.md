@@ -6,6 +6,8 @@ A colourful, standalone Roblox obby: **100 stages, 10 original meme worlds, one 
 
 ![Offline geometry preview, not a Roblox screenshot](docs/course-preview.png)
 
+**Update 2:** [Tung’s Mouth update notes](docs/UPDATE_2.md): smaller corner HUD, dancing brainrot figures, rotating bats, original percussion, and a giant mouth finish.
+
 The automated offline checks pass. **Roblox gameplay, physical devices, actual audio and live purchases have not been verified.** Claude review and Studio playtesting were waived by the requester; that waiver is not a passing test. See [verification results](docs/VERIFICATION.md) and [captured test output](docs/test-output.txt).
 
 ## What is included
@@ -18,7 +20,7 @@ The automated offline checks pass. **Roblox gameplay, physical devices, actual a
 - Server-owned progression, default Roblox player-list leaderboard, run timer, restart confirmation and optional coil/skip shop.
 - Speed and gravity coils; durable developer-product skip credits; replay-safe receipt processing; server checks on ownership, proximity, order and request frequency.
 - Optional promotion cards checked every 50 seconds, alternating coil and skip offers. Cards queue until two safe stationary seconds, disappear on movement, dismiss with X, and never automatically open checkout.
-- Saved settings for reminders, music, effects and reduced UI motion. Original chiptune sequencing uses a bundled Roblox sound; creators can substitute owned audio IDs.
+- Saved settings for reminders, music, effects and reduced UI motion. Original tung-style percussion uses bundled Roblox sounds; creators can substitute owned audio IDs.
 - Compact phone layout, scrollable menus, `Activated` buttons for mouse/touch/controller, B or controller Y to open the shop, and controller B to close menus. Device rendering still needs external verification.
 
 ## First launch

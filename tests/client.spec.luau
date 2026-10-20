@@ -70,6 +70,15 @@ local function click(value)
 end
 expect(gui~=nil,"client builds persistent UI")
 expect(findText("STAGE 1 / 100")~=nil,"initial server sync reaches HUD")
+expect(gui.CornerHUD.Size.X.Scale==0 and gui.CornerHUD.Size.X.Offset==216,"desktop stage readout stays in a small corner card")
+expect(gui.CornerHUD.Position.X.Scale==0 and gui.CornerHUD.Position.Y.Scale==0,"stage card never occupies the middle of the screen")
+for _,child in gui:GetChildren() do
+	if child.ClassName=="Frame" and child.Visible then expect(child.Size.X.Scale<.5,"no visible full-width gameplay overlay") end
+end
+local dancer=ctx.workspace.OrbitWorld.Lobby:FindFirstChild("Tung Tung Tung Sahur")
+local danceBase=dancer:GetPivot()
+services.RunService.RenderStepped:Fire()
+expect(dancer:GetPivot()~=danceBase,"brainrot scenery animates")
 click("SHOP")
 expect(findText("THE VIBE SHOP")~=nil,"shop button opens catalogue")
 expect(findText("BUY • R$ 20","TextButton")~=nil,"shop uses player's locally fetched regional price")
@@ -97,6 +106,8 @@ remotes.Notice:FireClient(p,"Quiet notification","Info")
 expect((chime.PlayCount or 0)==playCount,"SFX toggle mutes notification playback")
 settingToggle("Reduce interface motion").Activated:Fire()
 expect(settingToggle("Reduce interface motion").Text=="ON","reduced-motion setting responds")
+services.RunService.RenderStepped:Fire()
+expect(dancer:GetPivot()==danceBase,"reduced motion restores the stationary scenery pose")
 local toggle
 for _,ob in gui:GetDescendants() do
 	if ob.Text=="Optional purchase reminders" then
@@ -139,9 +150,8 @@ expect(findText("Skip Current Stage","TextLabel")~=nil,"next timed offer alterna
 -- Exercise the layout branch used by portrait phones.
 ctx.workspace.CurrentCamera.ViewportSize=r.Vector2.new(375,812)
 ctx.workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Fire()
-local brand=findText("BRAINROT\nORBIT")
-expect(not brand.Visible,"compact layout removes brand to preserve HUD space")
-expect(findText("STAGE 1 / 100").TextSize==17,"compact stage text layout")
+expect(gui.CornerHUD.Size.X.Offset==180,"phone stage card stays 180 pixels wide")
+expect(findText("STAGE 1 / 100").TextSize==14,"compact stage text layout")
 expect(card.Size.X.Offset==238,"compact promotion width fits portrait screen")
 expect(#ctx.errors==0,table.concat(ctx.errors,"\n"))
 print(string.format("PASS: %d client-wiring assertions with service doubles (not visual/device tests)",checks))

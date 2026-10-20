@@ -10,14 +10,14 @@ Run `python3 tools/verify.py --tools /workspace/obby-tools` in this cloud enviro
 
 | Check | Result | Evidence and scope |
 |---|---|---|
-| Map topology and generation | PASS | 8 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
+| Map topology and generation | PASS | 9 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
 | Luau compilation | PASS | All four production source files compiled using Luau 0.743 |
 | Shared-module strict type checks | PASS | `luau-analyze` passes Rules and Config; engine scripts were compiled/simulated, not type-checked against Studio's engine definitions |
 | Pure progression, promotion and transaction rules | PASS | 53 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
-| Production server event wiring | PASS | 53 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
-| Production client event wiring | PASS | 28 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
+| Production server event wiring | PASS | 54 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
+| Production client event wiring | PASS | 36 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
 | Shipped defaults and unpublished-place mode | PASS | 16 assertions with all product IDs zero and GetDataStore unavailable; full free run, earned cosmetics, restart and disabled checkout |
-| Roblox XML and binary serialization | PASS | 3,872 assertions using Lune 0.11.0/rbx-dom; 3,458 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
+| Roblox XML and binary serialization | PASS | 4,395 assertions using Lune 0.11.0/rbx-dom; 3,979 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
 | Tool installation repeatability | PASS | Pinned upstream Luau/Lune release archives downloaded with TLS and verified against fixed SHA-256 checksums before extraction |
 
 Service doubles simulate DataStore, MarketplaceService, player events, touch signals, scheduling and UI objects. They cannot establish that Roblox services, physics, touch input, audio or rendered pixels behave identically. Analytical geometry is not a gameplay playtest. No failed offline check remains in the final captured run.
@@ -30,13 +30,13 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 |---|---|---|
 | Complete 100-stage map exists | PASS | 100 models deserialized, numbered 1–100; simulated server run crossed every stage and reached marker 101 |
 | Ten vibrant themed maps/areas | PASS | Ten distinct palettes, named world banners, original mascots, scenery and decorative structures present; taste/visual quality in Roblox unverified |
-| Original brainrot-style theme | PASS | Noodle, toast, banana, frog, capybara, spaghetti, goose, jellybean, dumpling and cosmic themes generated from original geometry |
+| Original brainrot-style theme | PASS | Ten themed worlds plus custom Tung, coffee ballerina, sneaker shark and crocodile-plane figures generated from geometric parts |
 | Colourful lobby | PASS | Lobby island, coloured canopy kiosks, tree decorations, mascot, signs and original spawn are in the deserialized place; actual rendering unverified |
 | Course goes up and down | PASS | Height curve includes more than 20 rising and 20 falling segments; geometry test verifies vertical range |
 | Course curves instead of one straight line | PASS | X span over 350 studs and changing approach angles; continuous nonlinear route |
 | All obstacles exist | PASS | Ten obstacle categories each occur ten times; generated manifest contains every stage's platforms |
 | Free route through every stage | PASS | Conservative default-jump graph reaches each exit without paid coils, moving clouds or fading tiles; humanoid physics still unverified |
-| Finish/victory area exists | PASS | Victory island, finish pad, crown mascot, signs and server win reward are present |
+| Finish/victory area exists | PASS | Victory island, giant Tung mouth, tongue walkway, internal finish pad and server win reward are present |
 | Complete course is enjoyable and polished in actual play | UNVERIFIED | Requires player feedback and engine observation; automated counts cannot establish enjoyment |
 | No permanent respawn checkpoints | PASS | Exactly one SpawnLocation; no checkpoint scripts in the new place; death resets simulated run state |
 | Spawn returns to original start | PASS | Server spawn routine and initial lobby-facing placement simulated; actual automatic Roblox respawn unverified |
@@ -49,7 +49,7 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 | Lava hazards | UNVERIFIED | Touch simulation reduces health to zero; actual contact requires engine observation |
 | Rotating hazards | UNVERIFIED | Simulated rotation changes; moving-hazard overlap scan is implemented; real contact and jump timing unverified |
 | Character skins | UNVERIFIED | Coin purchase, original palette restoration, companion creation and free re-equip pass server simulation; rendered avatar appearance unverified |
-| Music | UNVERIFIED | Note sequencer and optional owned-track playlist implemented; simulated OFF stops notes; actual bundled sound playback unverified |
+| Music | UNVERIFIED | Original percussion sequencer and optional owned-track playlist implemented; simulated OFF stops notes; actual bundled sound playback unverified |
 | Sound-effect controls | PASS | Simulated muted notifications do not call Sound.Play; actual sound output unverified |
 | Reduced UI motion | PASS | Setting activation tested; transitions/confetti consult the option; rendered result unverified |
 | HUD/progress/timer | UNVERIFIED | Server state reaches correct initial HUD; progress/coins/wins are simulated; visual clipping and timer appearance unverified |

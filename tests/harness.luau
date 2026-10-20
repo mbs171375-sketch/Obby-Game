@@ -89,8 +89,18 @@ function Methods:Clone()
 	for key,value in self._props do if key~="Parent" then copy[key]=value end end
 	return copy
 end
-function Methods:PivotTo(cf) self.HumanoidRootPart.CFrame=cf end
-function Methods:GetPivot() return self.HumanoidRootPart.CFrame end
+function Methods:PivotTo(cf)
+	if self.HumanoidRootPart then self.HumanoidRootPart.CFrame=cf;return end
+	local delta=cf*self:GetPivot():Inverse()
+	for _,ob in self:GetDescendants() do if ob:IsA("BasePart") then ob.CFrame=delta*ob.CFrame end end
+	self.Pivot=cf
+end
+function Methods:GetPivot()
+	if self.HumanoidRootPart then return self.HumanoidRootPart.CFrame end
+	if self.Pivot then return self.Pivot end
+	for _,ob in self:GetDescendants() do if ob:IsA("BasePart") then return ob.CFrame end end
+	return C.new()
+end
 function Methods:FireClient(player,...) table.insert(self.messages,{player=player,args={...}}) end
 
 local decoded=roblox.deserializePlace(fs.readFile("dist/BrainrotOrbit.rbxlx"))

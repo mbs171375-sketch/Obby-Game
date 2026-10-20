@@ -132,6 +132,61 @@ class Place:
             for x in (-2.5,2.5):p('Capy ear',(x,2.5,0),(1.5,1.5,1.5),shape='Ball')
         return model
 
+    def brainrot(self,parent,kind,pos,scale=1,phase=0):
+        names={'tung':'Tung Tung Tung Sahur','coffee':'Ballerina Cappuccina','shark':'Tralalero Tralala','croc':'Bombardiro Crocodilo'}
+        model=self.item(parent,'Model',names[kind])
+        self.val(model,'Dance',float(phase))
+        def p(name,off,size,color,shape='Block'):
+            return self.part(model,name,plus(pos,tuple(v*scale for v in off)),tuple(v*scale for v in size),color,solid=False,shape=shape)
+        wood=(157,96,48);dark=(43,24,22);white=(255,250,234)
+        if kind=='tung':
+            p('Wooden log',(0,2,0),(5,10,4.5),wood,'Ball')
+            for x in (-1.7,-.8,.6,1.6):p('Wood grain',(x,1,-2.1),(.12,6,.12),(107,61,32))
+            for side in (-1,1):
+                p('Sahur eye',(side*1.1,4.1,-2.1),(1.5,1.9,.8),white,'Ball')
+                p('Sahur pupil',(side*1.1,4.1,-2.55),(.65,1,.25),dark,'Ball')
+                p('Wooden arm',(side*3,.3,0),(1,5,1),wood,'Ball')
+                p('Wooden leg',(side*1.1,-4,0),(1,3,1),wood)
+                p('Big foot',(side*1.1,-5,-.8),(1.8,.8,3),wood,'Ball')
+            p('Nose',(0,2.5,-2.65),(.8,1.5,1.2),wood,'Ball')
+            p('Grin',(0,.7,-2.3),(2.5,.85,.3),dark)
+            p('Teeth',(0,.88,-2.5),(2,.25,.2),white)
+            p('Sahur bat',(4.2,.5,-.2),(1.3,8,1.3),(194,133,69),'Ball')
+        elif kind=='coffee':
+            p('Coffee cup head',(0,4,0),(5,4.5,4.5),white)
+            p('Coffee surface',(0,6.3,0),(4.6,.18,4.1),(101,51,31))
+            for off,size in (((3,4,0),(.7,3,.7)),((2.4,5.5,0),(1.8,.7,.7)),((2.4,2.5,0),(1.8,.7,.7))):p('Cup handle',off,size,white)
+            p('Dancer body',(0,.5,0),(2.3,3.5,2.3),(255,159,213),'Ball')
+            for j in range(8):
+                angle=j*math.pi/4
+                p('Tutu petal',(math.cos(angle)*2,-1,math.sin(angle)*2),(2.6,.8,2.6),(255,180+j*6,225),'Ball')
+            for side in (-1,1):
+                p('Ballet arm',(side*2.8,1,0),(4,.6,.6),white)
+                p('Ballet leg',(side*.8,-3,0),(.65,4,.65),white)
+                p('Ballet shoe',(side*.8,-5,-.5),(1,.65,2),(244,109,184),'Ball')
+                p('Coffee eye',(side*1,4.2,-2.3),(.65,.85,.3),dark,'Ball')
+            p('Coffee smile',(0,3.2,-2.3),(1.5,.2,.2),dark)
+        elif kind=='shark':
+            p('Shark body',(0,0,0),(9,5,5),(86,173,221),'Ball')
+            p('Shark nose',(0,-.5,-3.2),(5,2.8,4),(113,201,239),'Ball')
+            p('Dorsal fin',(0,3,1),(1,4,3),(62,139,200))
+            p('Shark grin',(0,-1,-5),(3.2,.7,.2),white)
+            for side in (-1,1):p('Shark eye',(side*2,1,-2.5),(1,1,.5),dark,'Ball')
+            for x,z in ((-3,0),(3,0),(0,2)):
+                p('Blue sneaker',(x,-3,z-1),(2.5,1.6,4),(65,104,255))
+                p('White sneaker sole',(x,-3.85,z-1),(2.6,.3,4.1),white)
+        else:
+            p('Crocodile fuselage',(0,0,0),(6,4,12),(117,171,77),'Ball')
+            p('Croc snout',(0,-.2,-7),(5,2.4,5),(140,193,89))
+            p('Plane wings',(0,-.3,1),(19,.7,5),(125,147,108))
+            p('Tail fin',(0,3,5),(1,5,4),(100,153,66))
+            for side in (-1,1):
+                p('Croc eye',(side*1.5,2,-4),(1.6,1.4,1.6),white,'Ball')
+                p('Croc pupil',(side*1.5,2,-4.85),(.6,.65,.25),dark)
+                p('Propeller',(side*6,0,-2),(.6,5,.6),(232,230,196))
+            p('Croc teeth',(0,-.2,-9.6),(4,.4,.2),white)
+        return model
+
     def build(self):
         workspace=self.item(self.root,'Workspace','Workspace')
         self.prop(workspace,'float','Gravity',196.2)
@@ -162,6 +217,8 @@ class Place:
         self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=5)
         self.text(guide,'NO CHECKPOINTS\nDeath resets your run.\nCoins & cosmetics stay.\nEvery stage is free.',face=2)
         self.mascot(lobby,'frog',plus(first,(25,5,-26)),(123,255,142),1.4)
+        self.brainrot(lobby,'tung',plus(first,(-24,7,-7)),1.1)
+        self.brainrot(lobby,'coffee',plus(first,(24,7,-8)),1,2)
         for x,z,title,color in ((-25,-42,'COIL CLUB',(255,218,111)),(25,-44,'BUDDY BOUTIQUE',(255,145,211))):
             stand=self.part(lobby,title,plus(first,(x,2,z)),(12,4,7),(74,53,117))
             self.part(lobby,'Kiosk canopy',plus(first,(x,10,z)),(15,1,10),color,solid=False)
@@ -186,12 +243,28 @@ class Place:
         finish=self.item(world,'Model','VictoryIsland')
         self.part(finish,'Victory island',plus(end,(0,-3,18)),(60,6,54),(93,72,143))
         self.part(finish,'Victory gold',plus(end,(0,.2,18)),(58,.5,52),(255,221,111))
-        pad=self.part(finish,'FinishPad',end,(14,1,10),(255,226,95),material='Neon')
+        arrival=self.part(finish,'ArrivalPad',end,(14,1,10),(255,226,95),material='Neon')
+        self.val(arrival,'Safe',True)
+        pad=self.part(finish,'FinishPad',plus(end,(0,.65,23)),(16,.3,8),(255,93,143),material='Neon')
         self.val(pad,'Stage',101);self.val(pad,'Safe',True)
-        self.mascot(finish,'crown',plus(end,(0,7,25)),(255,193,83),2)
-        sign=self.part(finish,'Victory sign',plus(end,(0,17,40)),(42,10,1),(56,35,89),solid=False)
-        self.text(sign,'ALL 100. ABSOLUTE LEGEND.\n+100 COINS • +1 WIN\nUse RUN AGAIN to return.',face=5)
-        self.text(sign,'ALL 100. ABSOLUTE LEGEND.\n+100 COINS • +1 WIN\nUse RUN AGAIN to return.',face=2)
+        mouth=self.item(finish,'Model','TungMouth')
+        self.part(mouth,'Giant wooden head',plus(end,(0,26,22)),(38,30,12),(157,96,48))
+        for side in (-1,1):
+            self.part(mouth,'Mouth cheek',plus(end,(side*15,5,22)),(9,13,12),(157,96,48))
+            self.part(mouth,'Giant eye white',plus(end,(side*8,25,15)),(7,8,3),(255,250,234),shape='Ball',solid=False)
+            self.part(mouth,'Giant pupil',plus(end,(side*8,25,13.2)),(3.3,4.6,1),(38,24,20),shape='Ball',solid=False)
+            self.part(mouth,'Giant eyebrow',plus(end,(side*8,31,13)),(8,1,1),(70,36,20),solid=False)
+            self.part(mouth,'Giant arm',plus(end,(side*25,10,23)),(5,20,5),(157,96,48),shape='Ball',solid=False)
+        self.part(mouth,'Giant nose',plus(end,(0,18,14)),(4,7,5),(183,115,59),shape='Ball',solid=False)
+        self.part(mouth,'Dark mouth interior',plus(end,(0,6,31)),(21,12,.5),(37,12,27),solid=False)
+        self.part(mouth,'Tongue walkway',plus(end,(0,.35,18)),(19,.4,24),(250,111,149),solid=True)
+        for x in (-8,-4,0,4,8):
+            self.part(mouth,'Upper tooth',plus(end,(x,10.2,16)),(3.6,1.5,2),(255,245,211),solid=False)
+        self.part(mouth,'Giant sahur bat',plus(end,(29,17,21)),(4,35,4),(190,129,65),shape='Ball',solid=False)
+        sign=self.part(finish,'Victory sign',plus(end,(0,13,-7)),(34,4,1),(56,35,89),solid=False)
+        self.text(sign,"ENTER TUNG'S MOUTH\nTHE FINAL TUNG!",face=5)
+        self.text(sign,"ENTER TUNG'S MOUTH\nTHE FINAL TUNG!",face=2)
+        self.manifest['finish']={'arrival':end,'trigger':plus(end,(0,.65,23)),'mouth_width':21,'mouth_clearance':9.45}
         # Distant soft cloud clusters; no hidden collision traps.
         for i in range(35):
             p=route(i*3)
@@ -285,6 +358,9 @@ class Place:
         elif kind=='choice':
             for side in (-4,4):
                 for t in (.23,.37,.51,.65,.79):tile(t,side,width=5,label='Left lane' if side<0 else 'Right lane',c=primary if side<0 else secondary)
+            bat=self.part(model,'Sahur bat sweep',point(.51,-4,1.1),(6,.7,.8),(255,62,126),yaw,material='Neon',solid=False)
+            self.prop(bat,'bool','CanTouch',True)
+            self.val(bat,'Spinner',float(.85+zone*.03));self.val(bat,'Hazard',True)
         if i%10==0:
             self.manifest['themes'].append({'name':name,'motto':motto,'first_stage':num})
             # Theme arch is decorative and leaves the jumping corridor clear.
@@ -303,6 +379,13 @@ class Place:
         if i%3==1:
             self.mascot(model,mascot,point(.5,side*27,4),primary,.9)
             self.part(model,'Buddy cloud island',point(.5,side*27,-1),(16,6,14),secondary,shape='Ball',solid=False)
+        if i%4==0:
+            character=('tung','coffee','shark','croc')[(i//4)%4]
+            self.brainrot(model,character,point(.55,-side*29,7),1.2,float(i*.47))
+            self.part(model,'Brainrot stage',point(.55,-side*29,0),(18,2,17),primary,solid=False)
+            label=self.part(model,'Brainrot nameplate',point(.55,-side*29,15),(23,3,.5),(42,29,75),yaw,solid=False)
+            character_name={'tung':'TUNG TUNG TUNG SAHUR','coffee':'BALLERINA CAPPUCCINA','shark':'TRALALERO TRALALA','croc':'BOMBARDIRO CROCODILO'}[character]
+            self.text(label,character_name,face=5);self.text(label,character_name,face=2)
         if i%2==0:
             for k in range(3):
                 offset=side*(23+k*5)

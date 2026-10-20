@@ -127,19 +127,16 @@ local function mascot(parent,pos,size,color,kind)
 	return art
 end
 
-local hud = frame(gui,palette.Ink,UDim2.fromOffset(16,12),UDim2.new(1,-32,0,94));corner(hud,18);stroke(hud)
-local accent=frame(hud,palette.Mint,UDim2.fromOffset(0,20),UDim2.fromOffset(4,52));corner(accent,4)
-local brand=text(hud,"BRAINROT\nORBIT",16,palette.Mint,UDim2.fromOffset(15,10),UDim2.fromOffset(115,44),true)
-local worldLabel=text(hud,"01 / NOODLE NEBULA",13,palette.Muted,UDim2.fromOffset(145,10),UDim2.new(1,-370,0,20),true)
-local stageLabel=text(hud,"STAGE 1 / 100",22,palette.White,UDim2.fromOffset(145,31),UDim2.new(1,-370,0,29),true)
-local coinsLabel=text(hud,"0 COINS",15,palette.Gold,UDim2.new(1,-180,0,12),UDim2.fromOffset(162,22),true)
-local bestLabel=text(hud,"BEST 0  •  WINS 0",11,palette.Muted,UDim2.new(1,-180,0,38),UDim2.fromOffset(162,18))
-local timerLabel=text(hud,"00:00.0",11,palette.Mint,UDim2.new(1,-180,0,55),UDim2.fromOffset(162,14),true)
-local progressTrack=frame(hud,palette.Panel,UDim2.fromOffset(16,72),UDim2.new(1,-32,0,7));corner(progressTrack,7)
-local progressFill=frame(progressTrack,palette.Mint,UDim2.new(),UDim2.fromScale(0,1));corner(progressFill,7)
-local hintLabel=text(gui,"100 stages. One run. Every stage is free.",13,palette.White,UDim2.fromOffset(18,111),UDim2.new(1,-36,0,30))
-local saveLabel=text(gui,"Connecting...",11,palette.Gold,UDim2.new(1,-220,0,144),UDim2.fromOffset(200,18))
-saveLabel.TextXAlignment=Enum.TextXAlignment.Right
+-- A small corner readout leaves the centre and the course unobstructed.
+local hud=frame(gui,palette.Ink,UDim2.fromOffset(12,12),UDim2.fromOffset(216,76))
+hud.Name="CornerHUD";hud.BackgroundTransparency=.16;corner(hud,12);stroke(hud)
+local stageLabel=text(hud,"STAGE 1 / 100",16,palette.White,UDim2.fromOffset(12,7),UDim2.new(1,-24,0,21),true)
+local coinsLabel=text(hud,"0 COINS",11,palette.Gold,UDim2.fromOffset(12,31),UDim2.fromOffset(100,16),true)
+local timerLabel=text(hud,"00:00.0",11,palette.Mint,UDim2.fromOffset(118,31),UDim2.fromOffset(80,16),true)
+local worldLabel=text(hud,"01 / NOODLE NEBULA",10,palette.Muted,UDim2.fromOffset(12,50),UDim2.new(1,-24,0,15))
+local progressTrack=frame(hud,palette.Panel,UDim2.fromOffset(12,69),UDim2.new(1,-24,0,3));corner(progressTrack,3)
+local progressFill=frame(progressTrack,palette.Mint,UDim2.new(),UDim2.fromScale(0,1));corner(progressFill,3)
+local saveLabel=text(gui,"Connecting...",10,palette.Gold,UDim2.fromOffset(12,90),UDim2.fromOffset(250,16))
 
 local rail=frame(gui,palette.Ink,UDim2.new(1,-118,.5,-86),UDim2.fromOffset(102,172));corner(rail,14);stroke(rail)
 local shopButton=button(rail,"SHOP",UDim2.fromOffset(8,8),UDim2.fromOffset(86,44),palette.Panel,function() end)
@@ -160,10 +157,10 @@ local scroll=make("ScrollingFrame",panel,{ BackgroundTransparency=1,BorderSizePi
 make("UIListLayout",scroll,{ Padding=UDim.new(0,12),SortOrder=Enum.SortOrder.LayoutOrder })
 make("UIPadding",scroll,{ PaddingBottom=UDim.new(0,12),PaddingRight=UDim.new(0,6) })
 
-local toast=frame(gui,palette.Ink,UDim2.new(.5,0,0,170),UDim2.new(.8,0,0,64));toast.AnchorPoint=Vector2.new(.5,0)
+local toast=frame(gui,palette.Ink,UDim2.fromOffset(12,111),UDim2.fromOffset(270,54))
 corner(toast,14);stroke(toast);toast.Visible=false;toast.ZIndex=10
 make("UISizeConstraint",toast,{ MaxSize=Vector2.new(560,90) })
-local toastText=text(toast,"",14,palette.White,UDim2.fromOffset(16,8),UDim2.new(1,-32,1,-16),true)
+local toastText=text(toast,"",12,palette.White,UDim2.fromOffset(16,8),UDim2.new(1,-32,1,-16),true)
 local toastSerial=0
 local sfx=make("Sound",SoundService,{ Name="OrbitNotification",SoundId="rbxasset://sounds/electronicpingshort.wav",Volume=.15 })
 local function notify(message,kind)
@@ -249,7 +246,7 @@ local function showSettings()
 	local names={ Music="Music",SFX="Sound effects",Promotions="Optional purchase reminders",ReducedMotion="Reduce interface motion" }
 	for _,id in {"Music","SFX","Promotions","ReducedMotion"} do
 		local detail=if id=="Promotions" then "Only while standing still on a safe island. Never opens checkout."
-			elseif id=="Music" then "Original chiptune loop made from Roblox's bundled ping sound."
+			elseif id=="Music" then "Original tung-tung percussion loop. Your own uploaded tracks can replace it."
 			elseif id=="ReducedMotion" then "Removes interface transitions and victory confetti." else "Short milestone and notification sounds."
 		local r=row(names[id],detail,palette.White,112)
 		local toggle
@@ -342,10 +339,7 @@ State.OnClientEvent:Connect(function(data)
 	worldLabel.Text=string.format("%02d / %s",zone,string.upper(worlds[zone]))
 	stageLabel.Text=if data.Finished then "100 / 100 • LEGEND!" else string.format("STAGE %d / 100",stage)
 	coinsLabel.Text=string.format("%d COINS",data.Coins)
-	bestLabel.Text=string.format("BEST %d  •  WINS %d",data.Best,data.Wins)
 	animate(progressFill,{Size=UDim2.fromScale(data.Completed/100,1)},.35)
-	hintLabel.Text=if data.Finished then "You did it! Use RESTART for another run. Coins and cosmetics stay."
-		else hints[(stage-1)%10+1].."  •  Death resets the run."
 	saveLabel.Text=if data.Saving then "" else "SESSION ONLY • SAVES OFFLINE"
 	restartButton.Text=if data.Finished then "RUN AGAIN" else "RESTART"
 	updateShop()
@@ -358,19 +352,11 @@ local function layout()
 	local camera=workspace.CurrentCamera
 	if not camera then return end
 	local compact=camera.ViewportSize.X<650
-	brand.Visible=not compact
-	worldLabel.Position=UDim2.fromOffset(if compact then 15 else 145,10)
-	stageLabel.Position=UDim2.fromOffset(if compact then 15 else 145,31)
-	worldLabel.Size=UDim2.new(1,if compact then -150 else -370,0,20)
-	stageLabel.Size=UDim2.new(1,if compact then -150 else -370,0,29)
-	worldLabel.TextSize=if compact then 10 else 13
-	stageLabel.TextSize=if compact then 17 else 22
-	coinsLabel.Position=UDim2.new(1,if compact then -125 else -180,0,12)
-	bestLabel.Position=UDim2.new(1,if compact then -125 else -180,0,38)
-	timerLabel.Position=UDim2.new(1,if compact then -125 else -180,0,55)
-	coinsLabel.Size=UDim2.fromOffset(if compact then 110 else 162,22)
-	bestLabel.Size=UDim2.fromOffset(if compact then 110 else 162,18)
-	bestLabel.TextSize=if compact then 9 else 11
+	hud.Size=UDim2.fromOffset(if compact then 180 else 216,76)
+	stageLabel.TextSize=if compact then 14 else 16
+	worldLabel.TextSize=if compact then 9 else 10
+	coinsLabel.Size=UDim2.fromOffset(if compact then 82 else 100,16)
+	timerLabel.Position=UDim2.fromOffset(if compact then 98 else 118,31)
 	rail.Position=UDim2.new(1,if compact then -98 else -118,.5,-66)
 	rail.Size=UDim2.fromOffset(if compact then 82 else 102,172)
 	for _,b in {shopButton,settingsButton,restartButton} do b.Size=UDim2.fromOffset(if compact then 66 else 86,44);b.TextSize=if compact then 10 else 14 end
@@ -386,7 +372,23 @@ local function bindCamera()
 end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera);bindCamera()
 
+local dancers={}
+for _,model in workspace.OrbitWorld:GetDescendants() do
+	if model:IsA("Model") and model:FindFirstChild("Dance") then
+		table.insert(dancers,{model=model,base=model:GetPivot(),phase=model.Dance.Value,moving=false})
+	end
+end
 RunService.RenderStepped:Connect(function()
+	local now=workspace:GetServerTimeNow()
+	for _,dancer in dancers do
+		if settings.ReducedMotion then
+			if dancer.moving then dancer.model:PivotTo(dancer.base);dancer.moving=false end
+		else
+			local phase=now*math.pi*(Config.MusicBPM or 132)/60+dancer.phase
+			dancer.model:PivotTo(dancer.base*CFrame.new(0,math.sin(phase)*.65,0)*CFrame.Angles(0,math.sin(phase*.5)*.22,0))
+			dancer.moving=true
+		end
+	end
 	local elapsed=(snapshot.Elapsed or 0)+(if snapshot.Running then os.clock()-receivedAt else 0)
 	timerLabel.Text=string.format("%02d:%04.1f",math.floor(elapsed/60),elapsed%60)
 	local safe=isSafe()
@@ -406,10 +408,12 @@ task.spawn(function()
 end)
 task.spawn(function() while gui.Parent do task.wait(120);refreshPrices() end end)
 
--- Original low-volume melody using a bundled Roblox sound, with no licensed audio dependencies.
--- Set Config.MusicTracks to uploaded, owned audio IDs to replace the chiptune.
+-- Original percussion, not a recording of somebody else's song or voice.
+-- Creator-owned Roblox audio IDs in MusicTracks take precedence over this bundled-sound beat.
 local musicFolder=make("Folder",SoundService,{Name="OrbitMusic"})
-local notes={0,7,12,7,3,10,15,10,5,12,17,12,3,10,7,3}
+local function voice(name,asset,speed,volume)
+	return make("Sound",musicFolder,{Name=name,SoundId="rbxasset://sounds/"..asset,PlaybackSpeed=speed,Volume=volume})
+end
 task.spawn(function()
 	if #Config.MusicTracks>0 then
 		local index=1
@@ -422,17 +426,26 @@ task.spawn(function()
 			sound:Destroy();index=index%#Config.MusicTracks+1
 		end
 	else
-		local pool={}
-		for _=1,4 do table.insert(pool,make("Sound",musicFolder,{SoundId="rbxasset://sounds/electronicpingshort.wav",Volume=.035})) end
+		local tung={voice("TungLow","action_footsteps_plastic.mp3",.52,.13),voice("TungMid","action_footsteps_plastic.mp3",.66,.11),voice("TungHigh","action_footsteps_plastic.mp3",.81,.10)}
+		local clap=voice("SahurClap","action_jump.mp3",1.4,.055)
+		local hat=voice("Hat","action_footsteps_plastic.mp3",2.4,.025)
+		local bass=voice("Bass","electronicpingshort.wav",.32,.035)
 		local beat=0
+		local notes={0,0,3,7,0,5,3,-2}
+		local function hit(sound) sound:Stop();sound.TimePosition=0;sound:Play() end
 		while gui.Parent do
-			beat+=1
-			local sound=pool[(beat-1)%#pool+1]
+			local step=beat%16+1
 			if settings.Music then
-				sound.PlaybackSpeed=.65*2^((notes[(beat-1)%#notes+1]+math.max(0,currentZone-1)%3*2)/12)
-				sound.Volume=.035;sound:Play()
-			else for _,s in pool do s:Stop() end end
-			task.wait(.32)
+				if step==1 or step==4 or step==7 or step==9 or step==11 or step==15 then hit(tung[(beat%3)+1]) end
+				if step==5 or step==13 then hit(clap) end
+				if step%2==0 then hit(hat) end
+				if step%2==1 then
+					bass.PlaybackSpeed=.32*2^((notes[math.floor((step-1)/2)+1]+math.max(currentZone-1,0)%3*2)/12)
+					hit(bass)
+				end
+			else for _,sound in musicFolder:GetChildren() do if sound:IsA("Sound") then sound:Stop() end end end
+			beat+=1
+			task.wait(60/math.clamp(Config.MusicBPM or 132,60,180)/2)
 		end
 	end
 end)

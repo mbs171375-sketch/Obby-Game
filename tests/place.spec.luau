@@ -24,6 +24,8 @@ for i=1,100 do
 	expect(stage.SafePad.Color.R>0,"colours survive deserialization")
 end
 expect(world.VictoryIsland.FinishPad.Stage.Value==101,"finish marker")
+expect(world.VictoryIsland.FinishPad.CFrame.Position.Z>world.VictoryIsland.ArrivalPad.CFrame.Position.Z+20,"win trigger is inside Tung's mouth, not on arrival")
+expect(world.VictoryIsland.TungMouth:FindFirstChild("Tongue walkway").CanCollide,"tongue is a solid route into the mouth")
 expect(root:GetService("ReplicatedStorage").OrbitRemotes.Action:IsA("RemoteEvent"),"action remote exists")
 expect(root:GetService("StarterPlayer").StarterPlayerScripts.OrbitClient:IsA("LocalScript"),"client placement")
 local binary=roblox.serializePlace(root)
