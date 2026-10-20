@@ -15,7 +15,8 @@ The complete requirements supplied were sections 14–16, plus the request for a
 | `tests/server.spec.luau` | Production server code running on simulated services and a controllable clock |
 | `tests/client.spec.luau` | Production client code running on those services, with UI event simulations |
 | `tests/harness.luau` | Isolated deterministic service doubles and scheduler |
-| `tests/offline.spec.luau` | Shipped zero-ID configuration with unavailable DataStore |
+| `tests/offline.spec.luau` | Explicit zero-ID fixture with unavailable DataStore |
+| `tests/products.spec.luau` | Actual supplied catalogue IDs and ten-credit transactions on service doubles |
 | `tests/place.spec.luau` | Real Roblox XML/binary deserialization using Lune/rbx-dom |
 | `tests/test_map.py` | Full course topology, default jump reachability and deterministic builds |
 
@@ -35,15 +36,15 @@ Clients send only bounded action names and item identifiers. They cannot submit 
 
 Profiles use one DataStore key per player. Coins/wins save as deltas and best progress merges monotonically, preserving newer receipt updates. Local storage operations are serialized. Save outages keep unsaved deltas for retry; unpublished/initially unavailable storage uses an explicitly labelled session-only mode and disables purchases. A server crash before autosave can lose unflushed free rewards. There is no claim of cross-region transaction availability during an outage.
 
-Developer Product receipts add one durable skip credit and store the purchase ID in the same atomic `UpdateAsync`. Duplicate IDs never add another credit. Unknown products and failed storage operations return `NotProcessedYet`. Purchase completion signals alone never grant Developer Products. Game Pass completion re-queries server-side ownership before granting benefits.
+Developer Product receipts add the configured ten durable skip credits and store the purchase ID in the same atomic `UpdateAsync`. Duplicate IDs never add another credit. Unknown products and failed storage operations return `NotProcessedYet`. Purchase completion signals alone never grant Developer Products. Game Pass completion re-queries server-side ownership before granting benefits.
 
 Using a credit creates a durable reservation. A death or disconnect during use refunds it; an interrupted reservation is recovered on next join. If final settlement fails after delivery, recovery may favour the player by returning that credit, rather than destroying a paid entitlement. The receipt ledger fails closed at 4,000 distinct receipts per player; shard/archive receipt records before operating at that scale. It never silently deletes deduplication records.
 
-Client-side product queries obtain the user's regional price; a failed query hides the Buy offer rather than inventing a price. Prices and purchase eligibility still require live Roblox testing. All IDs default to zero.
+Client-side product queries obtain the user's regional price; a failed query hides the Buy offer rather than inventing a price. Prices and purchase eligibility still require live Roblox testing. The supplied Speed Coil (2038121195) and Jump Boot (2041634630) IDs are Game Passes; the ten-skip product (3720254856) is a Developer Product.
 
 ## Promotions and presentation
 
-The state machine checks a 50-second cadence and queues at most one offer. A card requires a living grounded character, a labelled Safe pad, low velocity and two continuous stationary seconds. Movement immediately hides it and retains the queued offer. Menus defer offers. Reminders can be disabled in Settings; the preference is saved when storage works. Coil and skip offers alternate, with speed/gravity alternating within coil offers. Already-owned or unavailable products are not advertised. There are no random paid rewards, urgency countdowns, fabricated discounts or automatic checkouts. Official Roblox prompts are opened only by explicit Buy actions. Platform purchase permissions remain enforced by Roblox.
+The state machine checks a 50-second cadence and queues at most one offer. A card requires a living grounded character, a labelled Safe surface in the lobby or numbered islands, low velocity and two continuous stationary seconds. Movement immediately hides it and retains the queued offer. Menus defer offers. Reminders can be disabled in Settings; the preference is saved when storage works. Coil and skip offers alternate, with speed/gravity alternating within coil offers. Already-owned or unavailable products are not advertised. There are no random paid rewards, urgency countdowns, fabricated discounts or automatic checkouts. Official Roblox prompts are opened only by explicit Buy actions. Platform purchase permissions remain enforced by Roblox.
 
 The selected soundtrack is user-supplied Roblox audio asset 134764779929866 (Brainrot Rap). Its exact SoundId and mute handling pass simulation, but live playback and experience permissions are unverified. A public metadata request was blocked by this cloud network with HTTP 403; this does not establish an invalid asset. Clearing MusicTracks selects an original 132 BPM percussion sequence using bundled samples. Cosmetics provide body colour accents, a companion and trail; they do not replace the player's avatar body or clothing. Reduced motion removes UI tweening and confetti and restores the 27 dancing brainrot models to their static poses; moving gameplay obstacles remain active.
 

@@ -85,15 +85,17 @@ function Rules.normalize(raw: any): Profile
 	return clean
 end
 
-function Rules.grantReceipt(raw: any, purchaseId: string): (Profile?, boolean)
+function Rules.grantReceipt(raw: any, purchaseId: string, quantity: number?): (Profile?, boolean)
 	local data = Rules.normalize(raw)
 	if data.Receipts[purchaseId] then return data, false end
+	local credits=quantity or 1
+	if not Rules.finite(credits) or credits%1~=0 or credits<1 or credits>100 then return nil,false end
 	-- Fail closed instead of dropping old receipt IDs and granting replayed purchases.
 	local count = 0
 	for _ in data.Receipts do count += 1 end
 	if count >= 4000 then return nil, false end
 	data.Receipts[purchaseId] = true
-	data.SkipCredits += 1
+	data.SkipCredits += credits
 	return data, true
 end
 

@@ -592,13 +592,13 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	local s = player and sessions[player]
 	if not s or not s.persistent then return IN_FLIGHT end
 	local result = update(player,function(data)
-		local updated = Rules.grantReceipt(data,tostring(receipt.PurchaseId))
+		local updated = Rules.grantReceipt(data,tostring(receipt.PurchaseId),Config.Products.Skip.Credits)
 		return updated
 	end)
 	if not result or not result.Receipts[tostring(receipt.PurchaseId)] then return IN_FLIGHT end
 	s.data = result
 	view(player)
-	notice(player,"Skip credit saved. Use it from a safe island when you choose.")
+	notice(player,string.format("%d skip credits saved. Use one from a safe island when you choose.",result.SkipCredits))
 	return GRANTED
 end
 
@@ -608,7 +608,8 @@ task.spawn(function()
 		if product.Id > 0 then
 			local kind = if product.Kind == "Pass" then Enum.InfoType.GamePass else Enum.InfoType.Product
 			local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, product.Id, kind)
-			if ok and type(info.PriceInRobux) == "number" and info.IsForSale then
+			local saleAllowed=ok and type(info)=="table" and (if product.Kind=="Pass" then info.IsForSale==true else info.IsForSale~=false)
+			if saleAllowed and Rules.finite(info.PriceInRobux) and info.PriceInRobux>=0 then
 				catalogue[name] = { Enabled = true, Price = info.PriceInRobux }
 			end
 		end

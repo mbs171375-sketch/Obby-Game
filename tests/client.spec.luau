@@ -84,6 +84,10 @@ expect(dancer:GetPivot()~=danceBase,"brainrot scenery animates")
 click("SHOP")
 expect(findText("THE VIBE SHOP")~=nil,"shop button opens catalogue")
 expect(findText("BUY • R$ 20","TextButton")~=nil,"shop uses player's locally fetched regional price")
+local packRow=findText("10 Stage Skips","TextLabel").Parent
+local packBuy=false
+for _,child in packRow:GetChildren() do if child.Text=="BUY • R$ 20" then packBuy=true end end
+expect(packBuy,"ten-pack can be bought when Developer Product metadata omits IsForSale")
 local prompts=#ctx.market.prompts
 expect(prompts>0,"fixture includes earlier server tests")
 local buy=findText("BUY • R$ 20","TextButton")
@@ -147,7 +151,7 @@ for _,ob in card:GetChildren() do if ob.ClassName=="TextButton" and ob.Text=="X"
 expect(not card.Visible,"promotion X dismisses card")
 expect(findText("SHOP","TextButton").Parent.Visible,"dismissing card restores menu access")
 ctx.step(46)
-expect(findText("Skip Current Stage","TextLabel")~=nil,"next timed offer alternates to skip")
+expect(findText("10 Stage Skips","TextLabel")~=nil,"next timed offer advertises the ten-credit product")
 
 -- Exercise the layout branch used by portrait phones.
 ctx.workspace.CurrentCamera.ViewportSize=r.Vector2.new(375,812)

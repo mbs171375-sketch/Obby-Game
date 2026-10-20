@@ -67,7 +67,8 @@ local function refreshPrices()
 			local kind = if product.Kind == "Pass" then Enum.InfoType.GamePass else Enum.InfoType.Product
 			-- Client query obtains the player's regional price. Never invent a price or discount.
 			local ok,info = pcall(MarketplaceService.GetProductInfoAsync,MarketplaceService,product.Id,kind)
-			if ok and info.IsForSale and Rules.finite(info.PriceInRobux) then
+			local saleAllowed=ok and type(info)=="table" and (if product.Kind=="Pass" then info.IsForSale==true else info.IsForSale~=false)
+			if saleAllowed and Rules.finite(info.PriceInRobux) and info.PriceInRobux>=0 then
 				localCatalogue[id] = {Enabled=true,Price=info.PriceInRobux}
 			else localCatalogue[id] = nil end
 		end

@@ -9,7 +9,9 @@ options=options or {}
 local Config=table.clone(BaseConfig)
 Config.Products={}
 for name,product in BaseConfig.Products do Config.Products[name]=table.clone(product) end
-if not options.defaultProducts then
+if options.zeroProducts then
+ for _,product in Config.Products do product.Id=0 end
+elseif not options.defaultProducts then
  Config.Products.Speed.Id=101;Config.Products.Gravity.Id=202;Config.Products.Skip.Id=303
 end
 local V,C=roblox.Vector3,roblox.CFrame
@@ -134,8 +136,8 @@ function storage:UpdateAsync(key,fn)
 end
 services.DataStoreService={GetDataStore=function() if options.storeUnavailable then error("unpublished place") end;return storage end}
 local market={PromptGamePassPurchaseFinished=signal(),prompts={},owns={}}
-function market:GetProductInfo() return {PriceInRobux=25,IsForSale=true} end
-function market:GetProductInfoAsync() return {PriceInRobux=20,IsForSale=true} end
+function market:GetProductInfo(_,kind) return if kind=="Product" then {PriceInRobux=25} else {PriceInRobux=25,IsForSale=true} end
+function market:GetProductInfoAsync(_,kind) return if kind=="Product" then {PriceInRobux=20} else {PriceInRobux=20,IsForSale=true} end
 function market:UserOwnsGamePassAsync(user,id) return self.owns[tostring(user)..":"..id] or false end
 function market:PromptGamePassPurchase(player,id) table.insert(self.prompts,{kind="Pass",id=id,player=player}) end
 function market:PromptProductPurchase(player,id) table.insert(self.prompts,{kind="Product",id=id,player=player}) end

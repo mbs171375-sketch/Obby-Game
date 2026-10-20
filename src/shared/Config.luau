@@ -1,5 +1,5 @@
 --!strict
--- Public configuration. IDs are deliberately zero until owned Roblox products exist.
+-- Public catalogue IDs supplied by the experience creator. Prices come from Roblox.
 return {
 	Title = "BRAINROT ORBIT",
 	StageCount = 100,
@@ -12,9 +12,9 @@ return {
 	WinCoins = 100,
 	DataStoreName = "BrainrotOrbit_v1",
 	Products = {
-		Speed = { Id = 0, Kind = "Pass", Name = "Speed Coil", Benefit = "Run faster while equipped", Color = {255, 208, 68} },
-		Gravity = { Id = 0, Kind = "Pass", Name = "Gravity Coil", Benefit = "Jump higher while equipped", Color = {157, 117, 255} },
-		Skip = { Id = 0, Kind = "Product", Name = "Skip Current Stage", Benefit = "One skip credit; unused credits are saved", Color = {63, 237, 213} },
+		Speed = { Id = 2038121195, Kind = "Pass", Name = "Speed Coil", Benefit = "Run faster while equipped", Color = {255, 208, 68} },
+		Gravity = { Id = 2041634630, Kind = "Pass", Name = "Jump Boot", Benefit = "Jump higher while equipped", Color = {157, 117, 255} },
+		Skip = { Id = 3720254856, Kind = "Product", Credits = 10, Name = "10 Stage Skips", Benefit = "10 saved credits; use one per stage", Color = {63, 237, 213} },
 	},
 	Skins = {
 		{ Id = "Classic", Name = "Orbit Explorer", Cost = 0, Color = {100, 211, 255} },

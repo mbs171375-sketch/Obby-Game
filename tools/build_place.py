@@ -228,9 +228,12 @@ class Place:
         world=self.item(workspace,'Folder','OrbitWorld')
         lobby=self.item(world,'Model','Lobby')
         first=route(0)
-        self.part(lobby,'Lobby island',plus(first,(0,-4,-30)),(74,8,64),(88,68,139))
-        self.part(lobby,'Lobby lawn',plus(first,(0,.1,-30)),(72,.5,62),(103,226,176),material='Grass')
+        lobby_base=self.part(lobby,'Lobby island',plus(first,(0,-4,-30)),(74,8,64),(88,68,139))
+        self.val(lobby_base,'Safe',True)
+        lawn=self.part(lobby,'Lobby lawn',plus(first,(0,.1,-30)),(72,.5,62),(103,226,176),material='Grass')
+        self.val(lawn,'Safe',True)
         spawn=self.item(lobby,'SpawnLocation','OriginalStart')
+        self.val(spawn,'Safe',True)
         for k,n,v in [('Vector3','size',(8,1,8)),('CoordinateFrame','CFrame',(plus(first,(0,1,-38)),0)),
                       ('bool','Anchored',True),('bool','Neutral',True),('bool','AllowTeamChangeOnTouch',False),('int','Duration',0),
                       ('Color3','Color',(.4,.8,1)),('token','Material',288)]:self.prop(spawn,k,n,v)

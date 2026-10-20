@@ -13,10 +13,11 @@ Run `python3 tools/verify.py --tools /workspace/obby-tools` in this cloud enviro
 | Map topology and generation | PASS | 11 Python tests, including all 100 stage routes, all 10 worlds, climbs, descents, curvature, one spawn, visible hazards and deterministic rebuilds |
 | Luau compilation | PASS | All four production source files compiled using Luau 0.743 |
 | Shared-module strict type checks | PASS | `luau-analyze` passes Rules and Config; engine scripts were compiled/simulated, not type-checked against Studio's engine definitions |
-| Pure progression, promotion and transaction rules | PASS | 58 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
+| Pure progression, promotion and transaction rules | PASS | 68 assertions using the actual Rules module, including malformed data, timer boundaries, receipt replay, refunds and insufficient currency |
 | Production server event wiring | PASS | 65 assertions executing the server script against deterministic service doubles, including a complete 100-stage run |
-| Production client event wiring | PASS | 37 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
-| Shipped defaults and unpublished-place mode | PASS | 16 assertions with all product IDs zero and GetDataStore unavailable; full free run, earned cosmetics, restart and disabled checkout |
+| Production client event wiring | PASS | 38 assertions executing the client script against service doubles; menus, regional-price display, settings, promotion deferral/hiding and compact layout |
+| Disabled-product and unpublished-place mode | PASS | 16 assertions using an explicit zero-ID fixture and GetDataStore unavailable; full free run, earned cosmetics, restart and disabled checkout |
+| Supplied Robux product configuration | PASS | 16 assertions exercise the creator-supplied pass/product IDs, lobby safe surfaces, checkout routes, ownership grants and ten-credit receipt replay using service doubles; no live payments |
 | Roblox XML and binary serialization | PASS | 6,708 assertions using Lune 0.11.0/rbx-dom; 6,292 BaseParts, 100 stage models, four embedded scripts, one spawn and successful binary round trip |
 | Tool installation repeatability | PASS | Pinned upstream Luau/Lune release archives downloaded with TLS and verified against fixed SHA-256 checksums before extraction |
 
@@ -62,14 +63,14 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 | Persistent coins/wins/best/skins/preferences | UNVERIFIED | Transform and service-double tests pass; real DataStore access and reconnect persistence untested |
 | Save outage fallback | PASS | Storage failure yields explicitly session-only state; simulated paid prompts disabled; production outages untested |
 | Speed and gravity coils | UNVERIFIED | Server verifies ownership and applies speed 23 / jump power 62, with baseline restoration; physical benefits/visuals unverified |
-| Stage skip credits | BLOCKED | Reservation, consume and recovery logic pass simulation; creator-owned Developer Product ID still needed for live availability |
-| Game Pass purchases | BLOCKED | Two creator-owned Game Pass IDs missing; zero IDs intentionally disable sale |
+| Stage skip credits | UNVERIFIED | Product 3720254856 configured for ten credits; atomic grant/replay/spend tests pass; live receipt delivery unverified |
+| Game Pass purchases | UNVERIFIED | Speed Coil 2038121195 and Jump Boot 2041634630 configured as creator-confirmed Game Passes; actual ownership and live checkout unverified |
 | Developer Product receipt processing | PASS | Duplicate receipts do not duplicate credits, unknown/offline/outage receipts retry, credit is persisted before acknowledgement in service doubles; real MarketplaceService delivery untested |
 | RemoteEvent validation | PASS | Bounds/type checks, ownership gates, sequential stage checks and rate flood tested; comprehensive movement anti-cheat is outside this implementation |
 | Multiplayer state separation | PASS | Three simulated users maintain independent state; actual multiplayer latency/physics unverified |
 | 50-second recurring promotion timer | PASS | Exact timer boundaries and no catch-up spam checked in Rules; production client queues an offer after 50 simulated seconds |
 | Alternate coil and skip offers | PASS | Speed → skip → gravity → skip tested in Rules; client alternation exercised |
-| Correct regional Robux price | UNVERIFIED | Client query used instead of server/global price; simulation deliberately returns different prices and verifies client value; live prices need configured products |
+| Correct regional Robux price | UNVERIFIED | Client regional-price query tested against service doubles; live prices for supplied IDs unverified |
 | Original graphics and card animation | UNVERIFIED | Geometric art and tweens implemented; no external image dependencies; real rendering unverified |
 | Clear X dismissal | PASS | Card dismissal tested; menu rail restored after dismissal |
 | Never interrupt active jumps/danger | PASS | Ground, velocity, safe marker and dwell gates implemented; simulated danger defers and movement hides; actual frame/input behaviour unverified |
@@ -92,6 +93,6 @@ PASS entries below state the specific offline evidence; they do not imply unperf
 
 ## Remaining external actions
 
-The standalone free place and all source are delivered. To activate Robux items, create the two Game Passes and one Developer Product for an experience you own, set their IDs in Config, and use Roblox's supported testing flow. No credentials or real purchases were requested or invented. Real persistence needs an owned published experience. Engine physics, rendering, audio, performance and devices remain unverified even though Studio playtesting was waived.
+The standalone free place and all source are delivered. The creator supplied all three product IDs and confirmed their types; they are configured. Publish this build over the same experience that owns those products, enable pass sales, and use Roblox's supported testing flow. No credentials or real purchases were requested or invented. Real persistence needs an owned published experience. Engine physics, rendering, audio, performance and devices remain unverified even though Studio playtesting was waived.
 
 Keep these distinctions when sharing the game: **implemented**, **offline tested**, **live configured**, **engine verified**, and **published** are different states. The project has not been published by this agent.

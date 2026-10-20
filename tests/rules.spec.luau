@@ -98,6 +98,17 @@ data=Rules.grantReceipt(data,"receipt-c")
 expect(data.Skins.Frog and data.Coins==40 and data.SkipCredits==2,"receipt preserves cosmetics and coins")
 
 -- Fail closed at the receipt ledger limit; never discard evidence and regrant old purchases.
+local pack=Rules.grantReceipt(nil,"ten-pack",10)
+expect(pack~=nil and pack.SkipCredits==10,"configured ten-pack quantity granted atomically")
+local replayed=Rules.grantReceipt(pack,"ten-pack",10)
+expect(replayed~=nil and replayed.SkipCredits==10,"ten-pack retry is idempotent")
+local used=Rules.reserveSkip(pack,"use-one")
+expect(used.SkipCredits==9,"ten-pack credits are individually consumable")
+local secondPack=Rules.grantReceipt(replayed,"another-ten-pack",10)
+expect(secondPack~=nil and secondPack.SkipCredits==20,"distinct ten-pack purchases accumulate")
+for _,quantity in {0,-1,1.5,101,0/0,math.huge} do
+	expect(Rules.grantReceipt(nil,"invalid-quantity",quantity)==nil,"invalid product grant quantity refused")
+end
 local full=Rules.newProfile()
 for i=1,4000 do full.Receipts[tostring(i)]=true end
 expect(Rules.grantReceipt(full,"new")==nil,"full ledger refuses new receipt safely")

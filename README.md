@@ -22,7 +22,7 @@ The automated offline checks pass. **Roblox gameplay, physical devices, actual a
 - Death resets the entire run to the original lobby. There are **no respawn checkpoints**. Coins, best progress, wins, cosmetics and unused skip credits are separate from run progress.
 - Earn two coins per completed intermediate stage and 100 bonus coins at the finish. Five character palettes with matching trails and original companions use earned coins.
 - Server-owned progression, default Roblox player-list leaderboard, run timer, restart confirmation and optional coil/skip shop.
-- Speed and gravity coils; durable developer-product skip credits; replay-safe receipt processing; server checks on ownership, proximity, order and request frequency.
+- Speed Coil and Jump Boot Game Passes; a repeatable ten-credit stage-skip Developer Product; replay-safe receipt processing; server checks on ownership, proximity, order and request frequency.
 - Optional promotion cards checked every 50 seconds, alternating coil and skip offers. Cards queue until two safe stationary seconds, disappear on movement, dismiss with X, and never automatically open checkout.
 - Saved settings for reminders, music, effects and reduced UI motion. Brainrot Rap uses the supplied Roblox audio ID. Clearing MusicTracks selects the original bundled-sound percussion loop.
 - Compact phone layout, scrollable menus, `Activated` buttons for mouse/touch/controller, B or controller Y to open the shop, and controller B to close menus. Device rendering still needs external verification.
@@ -36,17 +36,19 @@ The automated offline checks pass. **Roblox gameplay, physical devices, actual a
 
 ## Optional Robux products
 
-All product IDs deliberately default to **0**. The free course and coin cosmetics work without paid products; Robux items show **NOT ON SALE** and no purchase reminders are shown until configured.
+The creator supplied and confirmed these connected items. See [Robux setup and publishing steps](docs/ROBUX_SETUP.md).
 
-In Studio, edit `ReplicatedStorage → OrbitShared → Config`, or edit `src/shared/Config.luau` and rebuild:
+| Item | Type | Configured ID |
+|---|---|---|
+| Speed Coil | Game Pass | `2038121195` |
+| Jump Boot | Game Pass | `2041634630` |
+| 10 Stage Skips | Developer Product | `3720254856` |
 
-| Config entry | Creator-owned item needed |
-|---|---|
-| `Products.Speed.Id` | Speed Coil Game Pass ID |
-| `Products.Gravity.Id` | Gravity Coil Game Pass ID |
-| `Products.Skip.Id` | Skip Current Stage Developer Product ID |
+Each skip purchase adds **10 saved credits**, usable one at a time. Repeated receipts never duplicate the pack. Unused credits persist; death still resets run progress. Jump Boot uses the internal Gravity slot. Cosmetics still use earned coins.
 
-Create the products for this experience in Creator Dashboard and set their prices there. **Do not enter Robux prices in the code.** Client-side product queries retrieve regional prices; the official Roblox checkout is authoritative. No IDs or purchase tests were invented. The server grants paid skip credits only after a durable DataStore update and keeps them until the player explicitly uses one while safe. Death resets progress even after a skip.
+Prices come from Roblox, including regional client pricing; no Robux amount is hard-coded. Both passes must be on sale and the products must belong to the experience you publish over. Purchases require available DataStore persistence. Lobby and numbered safe islands can display optional offers after the 50-second cadence and two stationary seconds. Settings can turn reminders off.
+
+Open the new download in Studio and publish it **over the same existing experience** that owns these products. For Studio persistence tests, enable Studio Access to API Services. Live marketplace ownership, availability, pricing and actual transactions remain unverified here; offline tests use service doubles and never spend Robux.
 
 ## Build and verify
 

@@ -25,6 +25,7 @@ def main():
         [luau,'tests/rules.spec.luau'],
         [lune,'run','tests/client.spec.luau'],  # Also executes the production-server simulation.
         [lune,'run','tests/offline.spec.luau'],
+        [lune,'run','tests/products.spec.luau'],
         [lune,'run','tests/place.spec.luau'],   # Writes the binary deliverable after round-trip checks.
     ]
     output=[]

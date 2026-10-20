@@ -1,5 +1,5 @@
--- The delivered configuration, not the configured fake product IDs used in other tests.
-local ctx=require("./harness")({defaultProducts=true,storeUnavailable=true})
+-- Explicit disabled-product fixture checks fallback when a creator removes the catalogue.
+local ctx=require("./harness")({zeroProducts=true,storeUnavailable=true})
 local checks=0
 local function expect(value,message) checks+=1;assert(value,message) end
 local p=ctx.addPlayer(404)
@@ -7,7 +7,7 @@ local state=function() return ctx.state(p) end
 expect(state().Stage==1,"unpublished place starts at stage 1")
 expect(not state().Saving,"unavailable store explicitly reported")
 for _,id in {"Speed","Gravity","Skip"} do
-	expect(ctx.Config.Products[id].Id==0,"shipped product IDs stay zero")
+	expect(ctx.Config.Products[id].Id==0,"disabled fixture product IDs stay zero")
 	expect(not state().Catalogue[id].Enabled,"zero IDs are not on sale")
 end
 ctx.touch(p,1)
