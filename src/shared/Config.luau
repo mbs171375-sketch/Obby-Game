@@ -23,9 +23,9 @@ return {
 		{ Id = "Goose", Name = "Galaxy Goose", Cost = 100, Color = {238, 235, 255} },
 		{ Id = "Cosmic", Name = "Cosmic Dumpling", Cost = 160, Color = {255, 118, 224} },
 	},
-	-- Original local procedural soundtrack is enabled by default. Optional owned audio IDs:
-	MusicTracks = {},
+	-- Requested Brainrot Rap audio. The Roblox experience must have permission to play it.
+	MusicTracks = {85039047299073},
 	MusicBPM = 132,
-	-- Reference only: a permitted Roblox audio asset ID is still needed in MusicTracks.
+	-- Reference identifying the requested recording; this URL is not used for playback.
 	RequestedMusicReference = "https://www.youtube.com/watch?v=T_NKi5KHUdI",
 }

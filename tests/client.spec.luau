@@ -69,6 +69,8 @@ local function click(value)
 	ob.Activated:Fire();return ob
 end
 expect(gui~=nil,"client builds persistent UI")
+local soundtrack=services.SoundService.OrbitMusic:GetChildren()[1]
+expect(soundtrack.SoundId=="rbxassetid://85039047299073","requested Brainrot Rap asset selected")
 expect(findText("STAGE 1 / 100")~=nil,"initial server sync reaches HUD")
 expect(gui.CornerHUD.Size.X.Scale==0 and gui.CornerHUD.Size.X.Offset==216,"desktop stage readout stays in a small corner card")
 expect(gui.CornerHUD.Position.X.Scale==0 and gui.CornerHUD.Position.Y.Scale==0,"stage card never occupies the middle of the screen")
@@ -98,7 +100,7 @@ local function settingToggle(label)
 	error("Setting missing: "..label)
 end
 settingToggle("Music").Activated:Fire();ctx.step(1)
-for _,sound in services.SoundService.OrbitMusic:GetChildren() do expect(not sound.IsPlaying,"music toggle stops note playback") end
+for _,sound in services.SoundService.OrbitMusic:GetChildren() do expect(not sound.IsPlaying or sound.Volume==0,"music toggle silences soundtrack") end
 settingToggle("Sound effects").Activated:Fire()
 local chime=services.SoundService.OrbitNotification
 local playCount=chime.PlayCount or 0

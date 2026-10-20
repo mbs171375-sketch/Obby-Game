@@ -14,7 +14,7 @@ test_original_place_preserved (test_map.MapTests.test_original_place_preserved) 
 test_unique_referents_and_valid_instance_parents (test_map.MapTests.test_unique_referents_and_valid_instance_parents) ... ok
 
 ----------------------------------------------------------------------
-Ran 10 tests in 1.498s
+Ran 10 tests in 1.408s
 
 OK
 
@@ -28,7 +28,7 @@ PASS: 53 game-rule assertions
 
 + /workspace/obby-tools/lune run tests/client.spec.luau
 PASS: 64 production-server assertions with service doubles (not engine playtests)
-PASS: 36 client-wiring assertions with service doubles (not visual/device tests)
+PASS: 32 client-wiring assertions with service doubles (not visual/device tests)
 
 + /workspace/obby-tools/lune run tests/offline.spec.luau
 PASS: 16 shipped-default/unpublished-place assertions with service doubles

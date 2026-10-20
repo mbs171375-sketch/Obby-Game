@@ -246,7 +246,7 @@ local function showSettings()
 	local names={ Music="Music",SFX="Sound effects",Promotions="Optional purchase reminders",ReducedMotion="Reduce interface motion" }
 	for _,id in {"Music","SFX","Promotions","ReducedMotion"} do
 		local detail=if id=="Promotions" then "Only while standing still on a safe island. Never opens checkout."
-			elseif id=="Music" then "Original tung-tung percussion loop. Your own uploaded tracks can replace it."
+			elseif id=="Music" then (if #Config.MusicTracks>0 then "Brainrot Rap soundtrack. Turn the music on or off." else "Original tung-tung percussion loop.")
 			elseif id=="ReducedMotion" then "Removes interface transitions and victory confetti." else "Short milestone and notification sounds."
 		local r=row(names[id],detail,palette.White,112)
 		local toggle
@@ -421,7 +421,14 @@ task.spawn(function()
 			local sound=make("Sound",musicFolder,{SoundId="rbxassetid://"..tostring(Config.MusicTracks[index]),Volume=.18})
 			sound:Play()
 			local deadline=os.clock()+240
-			repeat sound.Volume=if settings.Music then .18 else 0;task.wait(.25)
+			local loadDeadline=os.clock()+12
+			local loadWarned=false
+			repeat
+				sound.Volume=if settings.Music then .18 else 0
+				if not sound.IsLoaded and os.clock()>loadDeadline and not loadWarned then
+					loadWarned=true;notify("Music could not load. Check the audio asset's experience permissions.","Warning")
+				end
+				task.wait(.25)
 				until (sound.IsLoaded and not sound.IsPlaying) or os.clock()>deadline
 			sound:Destroy();index=index%#Config.MusicTracks+1
 		end
